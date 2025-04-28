@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenBalcony - Smart Planting Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Sans+Condensed:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B5E43',
+                        'primary-light': '#4A7454',
+                        'primary-dark': '#2C4733',
+                        'primary-bg': '#F5F7F5',
+                    },
+                    fontFamily: {
+                        sans: ['"Fira Sans Condensed"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Design System */
+        .heading-1 {
+            @apply text-3xl font-bold text-primary mb-3;
+        }
+        .heading-2 {
+            @apply text-2xl font-bold mb-4;
+        }
+        .body-text {
+            @apply text-gray-600 text-lg;
+        }
+        .primary-button {
+            @apply bg-primary hover:bg-primary-dark text-white font-semibold py-4 px-6 rounded-full transition duration-300 ease-in-out whitespace-nowrap;
+        }
+        .secondary-button {
+            @apply border-2 border-gray-200 text-gray-600 font-semibold py-4 rounded-full hover:bg-gray-50 transition duration-300 ease-in-out whitespace-nowrap;
+        }
+        .section-spacing {
+            @apply mb-6;
+        }
+        .content-padding {
+            @apply p-8;
+        }
+        .interactive-element {
+            @apply transition duration-300 ease-in-out cursor-pointer;
+        }
+        .progress-bar {
+            @apply h-1 bg-gray-200 rounded-full;
+        }
+        .progress-bar-fill {
+            @apply h-full bg-primary rounded-full transition-all duration-300 ease-in-out;
+        }
+        
+        body {
+            font-family: 'Fira Sans Condensed', sans-serif;
+            background-color: #F5F7F5;
+            min-width: fit-content;
+        }
+        .screens-container {
+            display: flex;
+            padding: 2rem;
+            gap: 2rem;
+            overflow-x: auto;
+            min-height: calc(100vh - 4rem);
+            align-items: center;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+        .device-frame {
+            width: 375px;
+            height: 812px;
+            border-radius: 40px;
+            border: 12px solid #1a1a1a;
+            overflow: hidden;
+            position: relative;
+            background: white;
+            flex-shrink: 0;
+            scroll-snap-align: start;
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #3B5E43 0%, #4A7454 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .parallax-container {
+            position: relative;
+            width: calc(100% + 4rem);
+            height: 400px;
+            overflow: hidden;
+            margin: 0 -2rem;
+            background-color: white;
+        }
+        .parallax-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background-image: url('assets/bg_clean_simple_vector_illustration_empty_outdoor_balco_6909461a-7416-4373-8d07-aa06cffe6b3a.png');
+            background-size: cover;
+            background-position: center;
+            transform: translateZ(-1px);
+            transition: transform 0.3s ease-out;
+        }
+        .parallax-fg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            bottom: 0;
+            left: 0;
+            background-image: url('assets/man.png');
+            background-size: contain;
+            background-position: center bottom;
+            background-repeat: no-repeat;
+            transform: translateZ(0);
+            transition: transform 0.3s ease-out;
+        }
+        .sun {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle at center, #FFD700 30%, rgba(255, 215, 0, 0) 70%);
+            border-radius: 50%;
+            opacity: 0.8;
+            animation: glow 3s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes glow {
+            0%, 100% { 
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            50% { 
+                transform: scale(1.1);
+                opacity: 0.9;
+            }
+        }
+        .upload-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 2rem 0;
+        }
+        .camera-button {
+            width: 100%;
+            max-width: 280px;
+            padding: 1.25rem;
+            border-radius: 9999px;
+            background-color: var(--primary-color, #3B5E43);
+            color: white;
+            font-weight: 600;
+            font-size: 1.125rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+        }
+        .camera-button:hover {
+            background-color: var(--primary-dark, #2C4733);
+            transform: translateY(-2px);
+        }
+        .upload-button {
+            width: 100%;
+            max-width: 280px;
+            padding: 1.25rem;
+            border-radius: 9999px;
+            background-color: white;
+            color: var(--primary-color, #3B5E43);
+            font-weight: 600;
+            font-size: 1.125rem;
+            border: 2px solid var(--primary-color, #3B5E43);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+        }
+        .upload-button:hover {
+            background-color: var(--primary-bg, #F5F7F5);
+        }
+        .leaf-decoration {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            background-color: var(--primary-color, #3B5E43);
+            opacity: 0.1;
+            border-radius: 50% 0 50% 50%;
+        }
+        .leaf-top-right {
+            top: -20px;
+            right: -20px;
+            transform: rotate(-45deg);
+        }
+        .leaf-bottom-left {
+            bottom: -20px;
+            left: -20px;
+            transform: rotate(135deg);
+        }
+        .photo-grid {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            padding: 1rem 0;
+        }
+        .photo-item {
+            position: relative;
+            aspect-ratio: 3/4;
+            border-radius: 1rem;
+            overflow: hidden;
+            background-color: var(--primary-bg, #F5F7F5);
+        }
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .photo-item-actions {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+        .photo-action-button {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: var(--primary-color, #3B5E43);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+            transition: all 0.2s ease;
+        }
+        .photo-action-button:hover {
+            background-color: white;
+            transform: scale(1.1);
+        }
+        .photo-action-button.delete {
+            color: #DC2626;
+        }
+        .add-photo-item {
+            aspect-ratio: 3/4;
+            border-radius: 1rem;
+            border: 2px dashed var(--primary-color, #3B5E43);
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            color: var(--primary-color, #3B5E43);
+            transition: all 0.2s ease;
+        }
+        .add-photo-item:hover {
+            background-color: var(--primary-bg, #F5F7F5);
+        }
+        .photos-count {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary-color, #3B5E43);
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+        .photos-count i {
+            font-size: 1.25rem;
+        }
+        .screen-label {
+            position: absolute;
+            top: -3rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1a1a1a;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            white-space: nowrap;
+        }
+        .preference-section {
+            margin-bottom: 2rem;
+            width: 100%;
+        }
+        .option-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            width: 100%;
+        }
+        .option-card {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            border: 2px solid #E5E7EB;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        .sub-option-card {
+            padding: 0.75rem 1.25rem;
+            border-width: 1px;
+            border-radius: 0.75rem;
+        }
+        .sub-option-card i {
+            font-size: 1.25rem !important;
+        }
+        .sub-option-card .title {
+            font-size: 0.875rem !important;
+        }
+        .option-card.selected {
+            border-color: var(--primary-color, #3B5E43);
+            background-color: var(--primary-bg, #F5F7F5);
+        }
+        .option-card i {
+            font-size: 1.5rem;
+            color: var(--primary-color, #3B5E43);
+            flex-shrink: 0;
+        }
+        .sub-options {
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease-out;
+            margin-left: 1rem;
+            border-left: 2px solid #E5E7EB;
+            padding-left: 1rem;
+        }
+        .sub-options.active {
+            max-height: 200px;
+            margin-top: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+        .sub-options .option-card + .option-card {
+            margin-top: 0.5rem;
+        }
+        .bottom-button {
+            position: absolute;
+            bottom: 2rem;
+            left: 2rem;
+            right: 2rem;
+            width: calc(100% - 4rem);
+            transition: all 0.3s ease;
+            background-color: #E5E7EB;
+            color: #9CA3AF;
+            opacity: 1;
+        }
+        .bottom-button.active {
+            background-color: var(--primary-color, #3B5E43);
+            color: white;
+        }
+        .bottom-button:hover:not(:disabled) {
+            background-color: var(--primary-dark, #2C4733);
+        }
+        .screen-content {
+            height: 100%;
+            padding-bottom: 7rem;
+            overflow-y: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            position: relative;
+        }
+        .screen-content::-webkit-scrollbar {
+            display: none;
+        }
+        /* Plant Animation Styles */
+        .plant-animation {
+            --primary: #3B5E43;
+            --primary-light: #4A7454;
+        }
+
+        @keyframes stemGrow {
+            0% {
+                stroke-dashoffset: 100;
+                opacity: 0;
+            }
+            100% {
+                stroke-dashoffset: 0;
+                opacity: 1;
+            }
+        }
+
+        @keyframes leafGrow {
+            0% {
+                stroke-dashoffset: 50;
+                opacity: 0;
+            }
+            100% {
+                stroke-dashoffset: 0;
+                opacity: 1;
+            }
+        }
+
+        @keyframes flowerBloom {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            70% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes plantReset {
+            0% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .plant-animation .stem {
+            stroke-dasharray: 100;
+            animation: stemGrow 3s ease-out infinite;
+            animation-fill-mode: both;
+        }
+
+        .plant-animation .leaf {
+            stroke-dasharray: 50;
+            opacity: 0;
+        }
+
+        .plant-animation .leaf-1 {
+            animation: leafGrow 2s ease-out infinite;
+            animation-delay: 0.5s;
+        }
+
+        .plant-animation .leaf-2 {
+            animation: leafGrow 2s ease-out infinite;
+            animation-delay: 1s;
+        }
+
+        .plant-animation .leaf-3 {
+            animation: leafGrow 2s ease-out infinite;
+            animation-delay: 1.5s;
+        }
+
+        .plant-animation .flower {
+            transform-origin: center;
+            animation: flowerBloom 2s ease-out infinite;
+            animation-delay: 2s;
+        }
+
+        .plant-animation .pot {
+            transform-origin: bottom center;
+            animation: potRock 2s ease-in-out infinite;
+        }
+
+        #loading-animation {
+            animation: plantReset 6s ease-in-out infinite;
+        }
+
+        .tip-text {
+            min-height: 3em;
+            transition: opacity 800ms ease-in-out;
+        }
+
+        @keyframes potRock {
+            0%, 100% {
+                transform: rotate(0deg);
+            }
+            25% {
+                transform: rotate(-2deg);
+            }
+            75% {
+                transform: rotate(2deg);
+            }
+        }
+
+        /* Additional styles for result page */
+        .device-frame {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            overflow: hidden;
+        }
+        .device-frame::-webkit-scrollbar {
+            display: none;
+        }
+        #sliding-panel {
+            touch-action: pan-y;
+        }
+        #sliding-panel::-webkit-scrollbar {
+            display: none;
+        }
+        .full-image-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 50;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        .full-image-overlay img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        /* Bottom Button System */
+        .bottom-button-container {
+            @apply fixed bottom-8 left-8 right-8 flex gap-4 z-10;
+        }
+        .bottom-button {
+            @apply w-full bg-primary text-white font-semibold h-[56px] rounded-2xl text-lg transition-all duration-300 ease-in-out flex items-center justify-center gap-2 shadow-sm hover:bg-primary-dark active:transform active:scale-[0.98];
+        }
+        .bottom-button:disabled {
+            @apply bg-gray-200 text-gray-400 cursor-not-allowed hover:bg-gray-200 active:transform-none;
+        }
+        .bottom-button.secondary {
+            @apply bg-white border-2 border-primary text-primary hover:bg-primary-bg;
+        }
+        .bottom-button-group {
+            @apply w-full flex gap-4;
+        }
+        
+        /* Button Icon Styles */
+        .bottom-button i {
+            @apply text-2xl;
+        }
+        
+        /* Content Area Adjustment */
+        .screen-content {
+            @apply pb-24;  /* Ensure content doesn't hide behind fixed button */
+        }
+
+        /* Add smooth scrolling to the content area */
+        .overflow-y-auto {
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .overflow-y-auto::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .overflow-y-auto {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+
+        /* 添加以下动画类到现有的 style 标签中 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .animate-scale-in {
+            animation: scaleIn 0.5s ease-out forwards;
+        }
+
+        .animate-slide-in-right {
+            animation: slideInRight 0.5s ease-out forwards;
+        }
+
+        /* 按钮点击效果 */
+        .button-press {
+            transform: scale(0.95);
+            transition: transform 0.1s ease-in-out;
+        }
+
+        /* 卡片悬浮效果 */
+        .hover-lift {
+            transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 渐变过渡效果 */
+        .gradient-transition {
+            background-size: 200% auto;
+            transition: background-position 0.5s ease-out;
+        }
+
+        .gradient-transition:hover {
+            background-position: right center;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.querySelector('.parallax-container');
+            const bg = document.querySelector('.parallax-bg');
+            const fg = document.querySelector('.parallax-fg');
+
+            container.addEventListener('mousemove', function(e) {
+                const rect = container.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / rect.width;
+                const y = (e.clientY - rect.top) / rect.height;
+
+                const moveX = (x - 0.5) * 10;
+                const moveY = (y - 0.5) * 5;
+
+                bg.style.transform = `translate(${moveX * -1}px, ${moveY * -1}px)`;
+                fg.style.transform = `translate(${moveX * 0.3}px, ${moveY * 0.2}px)`;
+            });
+
+            container.addEventListener('mouseleave', function() {
+                bg.style.transform = 'translateZ(-1px)';
+                fg.style.transform = 'translateZ(0)';
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="screens-container">
+        <!-- Welcome Page -->
+        <div class="device-frame">
+            <div class="screen-label">Welcome Screen</div>
+            <div class="h-full flex flex-col items-center justify-between p-8 bg-white">
+                <div></div>
+                <div class="text-center">
+                    <i class="ri-plant-line text-7xl text-primary mb-6 block"></i>
+                    <h1 class="text-4xl font-bold mb-4 gradient-text">GreenBalcony</h1>
+                    <p class="text-gray-600 mb-8">Transform your balcony into a thriving garden with AI-powered plant recommendations</p>
+                    <button class="bg-primary hover:bg-primary-dark text-white font-semibold py-4 px-12 rounded-full transition duration-300 ease-in-out transform hover:scale-105">
+                        Get Started
+                    </button>
+                </div>
+                <p class="text-sm text-gray-400">By continuing, you agree to our Terms & Privacy Policy</p>
+            </div>
+        </div>
+
+        <!-- Introduction Page -->
+        <div class="device-frame">
+            <div class="screen-label">Location Info Screen</div>
+            <div class="h-full flex flex-col items-center p-8 bg-white">
+                <div class="w-full flex justify-between items-center mb-4">
+                    <button class="text-gray-600">
+                        <i class="ri-arrow-left-line text-2xl"></i>
+                    </button>
+                    <div class="h-1 flex-1 mx-4 bg-gray-200 rounded-full">
+                        <div class="w-1/6 h-full bg-primary rounded-full"></div>
+                    </div>
+                </div>
+                
+                <div class="flex-1 flex flex-col items-start w-full">
+                    <h2 class="text-3xl font-bold text-primary mb-3">Plants need care, just like pets.</h2>
+                    <p class="text-gray-600 text-lg mb-6">We need your location to provide accurate sunlight & temp data.</p>
+                    
+                    <div class="parallax-container">
+                        <div class="sun"></div>
+                        <div class="parallax-bg"></div>
+                        <div class="parallax-fg"></div>
+                    </div>
+
+                    <button class="w-full bg-primary hover:bg-primary-dark text-white font-semibold py-4 rounded-full transition duration-300 ease-in-out mt-6">
+                        OK
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Location Permission Page -->
+        <div class="device-frame">
+            <div class="screen-label">Location Permission Screen</div>
+            <div class="h-full flex flex-col items-center p-8 bg-white">
+                <div class="w-full flex justify-between items-center mb-4">
+                    <button class="text-gray-600">
+                        <i class="ri-arrow-left-line text-2xl"></i>
+                    </button>
+                    <div class="h-1 flex-1 mx-4 bg-gray-200 rounded-full">
+                        <div class="w-2/4 h-full bg-primary rounded-full"></div>
+                    </div>
+                </div>
+                
+                <div class="flex-1 flex flex-col items-center justify-center text-center">
+                    <div class="w-48 h-48 bg-primary-bg rounded-full flex items-center justify-center mb-8">
+                        <i class="ri-map-pin-line text-6xl text-primary"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold mb-4">Location Access</h2>
+                    <p class="text-gray-600 mb-8 px-6">We need your location to analyze sunlight patterns and recommend the best plants for your balcony</p>
+                    <button class="w-full bg-primary hover:bg-primary-dark text-white font-semibold py-4 rounded-full mb-4 transition duration-300 ease-in-out">
+                        Allow Location Access
+                    </button>
+                    <button class="w-full border-2 border-gray-200 text-gray-600 font-semibold py-4 rounded-full hover:bg-gray-50 transition duration-300 ease-in-out">
+                        Set Location Manually
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Photo Upload Page -->
+        <div class="device-frame">
+            <div class="screen-label">Photo Upload Screen</div>
+            <div class="h-full flex flex-col items-center p-8 bg-white">
+                <div class="w-full flex justify-between items-center mb-4">
+                    <button class="text-gray-600">
+                        <i class="ri-arrow-left-line text-2xl"></i>
+                    </button>
+                    <div class="h-1 flex-1 mx-4 bg-gray-200 rounded-full">
+                        <div class="w-3/4 h-full bg-primary rounded-full"></div>
+                    </div>
+                </div>
+                
+                <div class="flex-1 flex flex-col items-start w-full">
+                    <h2 class="text-3xl font-bold text-primary mb-3">Let's see your balcony!</h2>
+                    <p class="text-gray-600 text-lg mb-6">Create a planting plan that suits your conditions</p>
+                    
+                    <div class="photos-count">
+                        <i class="ri-image-line"></i>
+                        <span>3 of 6 photos added</span>
+                    </div>
+
+                    <div class="photo-grid">
+                        <div class="photo-item">
+                            <img src="assets/sample-balcony-1.jpg" alt="Balcony photo 1">
+                            <div class="photo-item-actions">
+                                <button class="photo-action-button">
+                                    <i class="ri-edit-line"></i>
+                                </button>
+                                <button class="photo-action-button delete">
+                                    <i class="ri-delete-bin-line"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="photo-item">
+                            <img src="assets/sample-balcony-2.jpg" alt="Balcony photo 2">
+                            <div class="photo-item-actions">
+                                <button class="photo-action-button">
+                                    <i class="ri-edit-line"></i>
+                                </button>
+                                <button class="photo-action-button delete">
+                                    <i class="ri-delete-bin-line"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="photo-item">
+                            <img src="assets/sample-balcony-3.jpg" alt="Balcony photo 3">
+                            <div class="photo-item-actions">
+                                <button class="photo-action-button">
+                                    <i class="ri-edit-line"></i>
+                                </button>
+                                <button class="photo-action-button delete">
+                                    <i class="ri-delete-bin-line"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <button class="add-photo-item">
+                            <i class="ri-add-line text-3xl"></i>
+                            <span>Add Photo</span>
+                        </button>
+                    </div>
+
+                    <button class="camera-button w-full mt-auto">
+                        <i class="ri-arrow-right-line text-2xl"></i>
+                        Continue
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Plant Preferences Screen -->
+        <div class="device-frame">
+            <div class="h-full flex flex-col items-center p-8 bg-white relative">
+                <div class="w-full flex justify-between items-center mb-4">
+                    <button class="text-gray-600">
+                        <i class="ri-arrow-left-line text-2xl"></i>
+                    </button>
+                    <div class="h-1 flex-1 mx-4 bg-gray-200 rounded-full">
+                        <div class="w-full h-full bg-primary rounded-full"></div>
+                    </div>
+                </div>
+
+                <div class="screen-content w-full">
+                    <div class="flex-1 flex flex-col items-start w-full">
+                        <h2 class="text-3xl font-bold text-primary mb-3">Choose your plants</h2>
+                        <p class="text-gray-600 text-lg mb-6">Tell us your preferences for personalized recommendations</p>
+
+                        <!-- I want to grow section -->
+                        <div class="preference-section">
+                            <h3 class="text-lg font-semibold mb-4">I want to grow:</h3>
+                            <div class="option-group">
+                                <button class="option-card" data-type="ornamental">
+                                    <i class="ri-eye-line"></i>
+                                    <div class="content">
+                                        <div class="title">Ornamental</div>
+                                    </div>
+                                </button>
+
+                                <div class="sub-options" id="ornamental-options">
+                                    <button class="option-card sub-option-card" data-sub="foliage">
+                                        <i class="ri-plant-line"></i>
+                                        <div class="content">
+                                            <div class="title">Foliage Plants</div>
+                                        </div>
+                                    </button>
+                                    <button class="option-card sub-option-card" data-sub="flowering">
+                                        <i class="ri-sun-line"></i>
+                                        <div class="content">
+                                            <div class="title">Flowering Plants</div>
+                                        </div>
+                                    </button>
+                                </div>
+
+                                <button class="option-card" data-type="edible">
+                                    <i class="ri-emotion-happy-line"></i>
+                                    <div class="content">
+                                        <div class="title">Edible</div>
+                                    </div>
+                                </button>
+
+                                <div class="sub-options" id="edible-options">
+                                    <button class="option-card sub-option-card" data-sub="herbs">
+                                        <i class="ri-leaf-line"></i>
+                                        <div class="content">
+                                            <div class="title">Herbs</div>
+                                        </div>
+                                    </button>
+                                    <button class="option-card sub-option-card" data-sub="vegetables">
+                                        <i class="ri-plant-line"></i>
+                                        <div class="content">
+                                            <div class="title">Vegetables</div>
+                                        </div>
+                                    </button>
+                                    <button class="option-card sub-option-card" data-sub="fruits">
+                                        <i class="ri-apple-line"></i>
+                                        <div class="content">
+                                            <div class="title">Berries & Fruits</div>
+                                        </div>
+                                    </button>
+                                </div>
+
+                                <button class="option-card" data-type="both">
+                                    <i class="ri-contrast-line"></i>
+                                    <div class="content">
+                                        <div class="title">Both</div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Growing cycle section -->
+                        <div class="preference-section">
+                            <h3 class="text-lg font-semibold mb-4">Growing cycle:</h3>
+                            <div class="option-group">
+                                <button class="option-card" data-cycle="perennial">
+                                    <i class="ri-repeat-2-line"></i>
+                                    <div class="content">
+                                        <div class="title">Perennial</div>
+                                        <div class="description">Plant once, harvest yearly</div>
+                                    </div>
+                                </button>
+
+                                <div class="sub-options" id="perennial-options">
+                                    <button class="option-card sub-option-card" data-winter="indoors">
+                                        <i class="ri-home-4-line"></i>
+                                        <div class="content">
+                                            <div class="title">Winter indoors</div>
+                                        </div>
+                                    </button>
+                                    <button class="option-card sub-option-card" data-winter="outdoors">
+                                        <i class="ri-snowy-line"></i>
+                                        <div class="content">
+                                            <div class="title">Winters outdoors</div>
+                                        </div>
+                                    </button>
+                                </div>
+
+                                <button class="option-card" data-cycle="annual">
+                                    <i class="ri-restart-line"></i>
+                                    <div class="content">
+                                        <div class="title">Annual</div>
+                                        <div class="description">Fresh start yearly</div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="bottom-button font-semibold py-4 rounded-full transition duration-300 ease-in-out disabled:cursor-not-allowed" disabled>
+                    Create My Garden
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading Screen -->
+        <div class="device-frame">
+            <div class="h-full flex flex-col items-center justify-center p-8 bg-white relative">
+                <div class="w-full max-w-[240px] mx-auto" id="loading-animation">
+                    <svg class="plant-animation w-full" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Pot -->
+                        <path class="pot" d="M60 160 L140 160 L130 200 L70 200 Z" fill="#8B5E3C"/>
+                        
+                        <!-- Stem -->
+                        <path class="stem" d="M100 160 Q100 120 100 80" stroke="#3B5E43" stroke-width="4" stroke-linecap="round"/>
+                        
+                        <!-- Leaves -->
+                        <path class="leaf leaf-1" d="M100 140 Q120 130 110 110" stroke="#3B5E43" stroke-width="4" stroke-linecap="round"/>
+                        <path class="leaf leaf-2" d="M100 120 Q80 110 90 90" stroke="#3B5E43" stroke-width="4" stroke-linecap="round"/>
+                        <path class="leaf leaf-3" d="M100 100 Q120 90 110 70" stroke="#3B5E43" stroke-width="4" stroke-linecap="round"/>
+                        
+                        <!-- Flower -->
+                        <circle class="flower" cx="100" cy="60" r="8" fill="#FF69B4"/>
+                    </svg>
+                </div>
+
+                <div class="mt-12 text-center">
+                    <h3 class="text-2xl font-bold text-primary mb-3">Creating your garden plan...</h3>
+                    <p id="loading-tip" class="tip-text text-gray-600 text-lg transition-opacity duration-500"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result Page -->
+        <div class="device-frame">
+            <div class="h-full flex flex-col bg-white overflow-hidden">
+                <!-- Preview Image (Fixed) -->
+                <div class="relative h-[60%] bg-black">
+                    <img src="assets/balcony_preview.png" 
+                         alt="AI Generated Garden Preview" 
+                         class="w-full h-full object-cover"
+                         onclick="showFullImage(this.src)"/>
+                </div>
+
+                <!-- Sliding Content Panel -->
+                <div class="absolute bottom-0 left-0 right-0 min-h-[45%] max-h-[90%] bg-white rounded-t-3xl shadow-lg transform transition-transform duration-300 ease-out"
+                     id="result-sliding-panel">
+                    <!-- Title Section -->
+                    <h1 class="text-xl font-semibold text-white absolute top-[-48px] left-6 whitespace-nowrap tracking-wide">
+                        This is your future balcony
+                    </h1>
+                    
+                    <!-- Scrollable Content -->
+                    <div class="h-full overflow-y-auto px-8 pb-32 pt-6">
+                        <!-- Plants List -->
+                        <div class="plant-card flex items-start gap-4 mb-8">
+                            <div class="w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
+                                <img src="assets/plant1.jpg" alt="Parsley" class="w-full h-full object-cover"/>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-2xl font-semibold text-gray-900">Parsley</h3>
+                                <p class="text-gray-500 italic mt-1">Right side of planter</p>
+                                <p class="text-gray-600 mt-2 mb-4 text-base">
+                                    Tolerates partial shade well, aromatic and versatile in cooking
+                                </p>
+                                <button class="text-primary font-medium bg-primary-bg rounded-full px-6 py-2.5 text-base hover:bg-primary hover:text-white transition-all duration-300">
+                                    More about Parsley
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Plant Card Template -->
+                        <div class="plant-card flex items-start gap-4 mb-8">
+                            <div class="w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
+                                <img src="assets/plant2.jpg" alt="Cilantro" class="w-full h-full object-cover"/>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-2xl font-semibold text-gray-900">Cilantro/Coriander</h3>
+                                <p class="text-gray-500 italic mt-1">Left side of planter</p>
+                                <p class="text-gray-600 mt-2 mb-4 text-base">
+                                    Tolerates partial shade well, aromatic and versatile in cooking
+                                </p>
+                                <button class="text-primary font-medium bg-primary-bg rounded-full px-6 py-2.5 text-base hover:bg-primary hover:text-white transition-all duration-300">
+                                    More about Cilantro
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fixed Bottom Buttons -->
+                    <div class="fixed bottom-0 left-0 right-0 p-6 bg-white border-t border-gray-100">
+                        <div class="flex gap-4 max-w-md mx-auto">
+                            <button class="flex-1 bg-primary hover:bg-primary-dark text-white font-medium py-3.5 rounded-full flex items-center justify-center gap-2 transition-all duration-300">
+                                <i class="ri-refresh-line text-xl"></i>
+                                <span>Change Plants</span>
+                            </button>
+                            <button class="flex-1 bg-primary hover:bg-primary-dark text-white font-medium py-3.5 rounded-full flex items-center justify-center gap-2 transition-all duration-300">
+                                <i class="ri-download-line text-xl"></i>
+                                <span>Save Plan</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Plant Detail Page -->
+        <div class="device-frame">
+            <div class="h-full flex flex-col bg-white">
+                <!-- Header -->
+                <div class="relative h-[40%] bg-black transition-all duration-300" id="header-image">
+                    <img src="assets/plants/parsley-hero.jpg" 
+                         alt="Parsley plant" 
+                         class="w-full h-full object-cover opacity-90"/>
+                    <button class="absolute top-6 left-6 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center backdrop-blur-sm">
+                        <i class="ri-arrow-left-line text-xl text-gray-700"></i>
+                    </button>
+                </div>
+
+                <!-- Content -->
+                <div class="flex-1 bg-white -mt-6 rounded-t-3xl overflow-y-auto transition-all duration-300" id="detail-panel">
+                    <div class="px-6 py-8">
+                        <!-- Plant Identity -->
+                        <div class="flex items-start justify-between mb-6">
+                            <div>
+                                <h1 class="text-[32px] font-bold text-gray-900 mb-2">Parsley</h1>
+                                <p class="text-gray-500 italic">Petroselinum crispum</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-full bg-primary-bg flex items-center justify-center">
+                                <img src="assets/icons/parsley.svg" alt="" class="w-6 h-6"/>
+                            </div>
+                        </div>
+
+                        <!-- Growing Conditions -->
+                        <div class="mb-10">
+                            <h2 class="text-xl font-semibold mb-6">Growing Conditions</h2>
+                            <div class="grid grid-cols-3 gap-4">
+                                <div class="aspect-square bg-primary-bg rounded-2xl flex flex-col items-center justify-center">
+                                    <i class="ri-sun-line text-2xl text-primary mb-2"></i>
+                                    <p class="text-sm">Partial<br/>Shade</p>
+                                </div>
+                                <div class="aspect-square bg-primary-bg rounded-2xl flex flex-col items-center justify-center">
+                                    <i class="ri-drop-line text-2xl text-primary mb-2"></i>
+                                    <p class="text-sm">Moderate<br/>Water</p>
+                                </div>
+                                <div class="aspect-square bg-primary-bg rounded-2xl flex flex-col items-center justify-center">
+                                    <i class="ri-temp-cold-line text-2xl text-primary mb-2"></i>
+                                    <p class="text-sm">15-25°C</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Planting Guide -->
+                        <div class="mb-10">
+                            <h2 class="text-xl font-semibold mb-6">Planting Guide</h2>
+                            <div class="space-y-4">
+                                <div class="flex items-start gap-4">
+                                    <div class="w-8 h-8 rounded-full bg-primary-bg flex items-center justify-center flex-shrink-0">
+                                        <span class="text-primary font-medium">1</span>
+                                    </div>
+                                    <p class="text-gray-600 text-base pt-1">Sow seeds 1-2 cm deep in well-draining soil</p>
+                                </div>
+                                <div class="flex items-start gap-4">
+                                    <div class="w-8 h-8 rounded-full bg-primary-bg flex items-center justify-center flex-shrink-0">
+                                        <span class="text-primary font-medium">2</span>
+                                    </div>
+                                    <p class="text-gray-600 text-base pt-1">Space plants 15-20 cm apart</p>
+                                </div>
+                                <div class="flex items-start gap-4">
+                                    <div class="w-8 h-8 rounded-full bg-primary-bg flex items-center justify-center flex-shrink-0">
+                                        <span class="text-primary font-medium">3</span>
+                                    </div>
+                                    <p class="text-gray-600 text-base pt-1">Keep soil consistently moist until germination</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Care Tips -->
+                        <div class="mb-10">
+                            <h2 class="text-xl font-semibold mb-6">Care Tips</h2>
+                            <div class="space-y-4">
+                                <div class="flex items-start gap-4">
+                                    <i class="ri-check-line text-xl text-primary"></i>
+                                    <p class="text-gray-600 text-base">Water regularly but avoid waterlogging</p>
+                                </div>
+                                <div class="flex items-start gap-4">
+                                    <i class="ri-check-line text-xl text-primary"></i>
+                                    <p class="text-gray-600 text-base">Trim regularly to encourage bushier growth</p>
+                                </div>
+                                <div class="flex items-start gap-4">
+                                    <i class="ri-check-line text-xl text-primary"></i>
+                                    <p class="text-gray-600 text-base">Remove any yellow or damaged leaves</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Harvesting -->
+                        <div class="mb-10">
+                            <h2 class="text-xl font-semibold mb-6">Harvesting</h2>
+                            <p class="text-gray-600 text-base leading-relaxed">
+                                Harvest outer stems at soil level when leaves are dark green and fresh. Regular harvesting encourages new growth. Best flavor when harvested in the morning.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const state = {
+                growType: {
+                    main: null,
+                    sub: null
+                },
+                growingCycle: {
+                    main: null,
+                    sub: null
+                }
+            };
+
+            function updateUI() {
+                // Update option cards
+                document.querySelectorAll('.option-card').forEach(card => {
+                    const type = card.dataset.type;
+                    const cycle = card.dataset.cycle;
+                    const sub = card.dataset.sub;
+                    const winter = card.dataset.winter;
+
+                    if (type) {
+                        card.classList.toggle('selected', state.growType.main === type);
+                    } else if (cycle) {
+                        card.classList.toggle('selected', state.growingCycle.main === cycle);
+                    } else if (sub) {
+                        card.classList.toggle('selected', state.growType.sub === sub);
+                    } else if (winter) {
+                        card.classList.toggle('selected', state.growingCycle.sub === winter);
+                    }
+                });
+
+                // Update sub-options visibility
+                if (state.growType.main === 'ornamental') {
+                    document.getElementById('ornamental-options').classList.add('active');
+                    document.getElementById('edible-options').classList.remove('active');
+                } else if (state.growType.main === 'edible') {
+                    document.getElementById('ornamental-options').classList.remove('active');
+                    document.getElementById('edible-options').classList.add('active');
+                } else {
+                    document.getElementById('ornamental-options').classList.remove('active');
+                    document.getElementById('edible-options').classList.remove('active');
+                }
+
+                if (state.growingCycle.main === 'perennial') {
+                    document.getElementById('perennial-options').classList.add('active');
+                } else {
+                    document.getElementById('perennial-options').classList.remove('active');
+                }
+
+                // Update bottom button
+                const continueButton = document.querySelector('.bottom-button');
+                const isComplete = isSelectionComplete();
+                continueButton.disabled = !isComplete;
+                continueButton.classList.toggle('active', isComplete);
+            }
+
+            function isSelectionComplete() {
+                const growTypeComplete = 
+                    state.growType.main === 'both' || 
+                    (state.growType.main && state.growType.sub);
+
+                const cycleComplete = 
+                    state.growingCycle.main === 'annual' ||
+                    (state.growingCycle.main === 'perennial' && state.growingCycle.sub);
+
+                return growTypeComplete && cycleComplete;
+            }
+
+            // Event listeners
+            document.querySelectorAll('.option-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const type = card.dataset.type;
+                    const cycle = card.dataset.cycle;
+                    const sub = card.dataset.sub;
+                    const winter = card.dataset.winter;
+
+                    if (type) {
+                        state.growType.main = type;
+                        state.growType.sub = null;
+                    } else if (cycle) {
+                        state.growingCycle.main = cycle;
+                        state.growingCycle.sub = null;
+                    } else if (sub) {
+                        state.growType.sub = sub;
+                    } else if (winter) {
+                        state.growingCycle.sub = winter;
+                    }
+
+                    updateUI();
+                });
+            });
+
+            // Gardening tips array
+            const gardeningTips = [
+                "Water deeply but less frequently to encourage deep root growth",
+                "Position plants based on their sunlight requirements",
+                "Use well-draining soil to prevent root rot",
+                "Group plants with similar water needs together",
+                "Prune regularly to promote healthy growth",
+                "Monitor your plants for early signs of problems",
+                "Add organic matter to soil for better nutrients",
+                "Consider companion planting for natural pest control"
+            ];
+
+            // Initialize loading animations and tips
+            function initLoading() {
+                const tipElement = document.getElementById('loading-tip');
+                let currentTip = 0;
+
+                function showNextTip() {
+                    tipElement.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        tipElement.textContent = gardeningTips[currentTip];
+                        tipElement.style.opacity = '1';
+                        currentTip = (currentTip + 1) % gardeningTips.length;
+                    }, 800);
+                }
+
+                // Start showing tips
+                showNextTip();
+                setInterval(showNextTip, 6000);
+            }
+
+            // Initialize when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initLoading);
+            } else {
+                initLoading();
+            }
+        });
+
+        // Full image view functionality
+        function showFullImage(src) {
+            const overlay = document.createElement('div');
+            overlay.className = 'full-image-overlay';
+            overlay.innerHTML = `<img src="${src}" alt="Full size preview">`;
+            document.body.appendChild(overlay);
+            
+            overlay.style.display = 'flex';
+            overlay.addEventListener('click', () => {
+                overlay.remove();
+            });
+        }
+
+        // Add panel sliding interaction
+        document.addEventListener('DOMContentLoaded', function() {
+            const panel = document.getElementById('detail-panel');
+            const header = document.getElementById('header-image');
+            let startY = 0;
+            let startHeight = 40;
+            let isDragging = false;
+
+            function updatePanelHeight(height) {
+                const headerHeight = 100 - height;
+                if (headerHeight >= 15 && headerHeight <= 40) {
+                    header.style.height = `${headerHeight}%`;
+                    panel.style.height = `${height}%`;
+                }
+            }
+
+            panel.addEventListener('touchstart', function(e) {
+                isDragging = true;
+                startY = e.touches[0].clientY;
+                panel.style.transition = 'none';
+                header.style.transition = 'none';
+            });
+
+            panel.addEventListener('touchmove', function(e) {
+                if (!isDragging) return;
+                const deltaY = startY - e.touches[0].clientY;
+                const newHeight = Math.min(Math.max(60 + (deltaY / window.innerHeight) * 100, 60), 85);
+                updatePanelHeight(newHeight);
+            });
+
+            panel.addEventListener('touchend', function() {
+                isDragging = false;
+                panel.style.transition = 'height 0.3s ease-out';
+                header.style.transition = 'height 0.3s ease-out';
+                const currentHeight = parseFloat(panel.style.height);
+                const snapHeight = currentHeight > 72.5 ? 85 : 60;
+                updatePanelHeight(snapHeight);
+            });
+
+            // Add mouse support for desktop testing
+            panel.addEventListener('mousedown', function(e) {
+                isDragging = true;
+                startY = e.clientY;
+                panel.style.transition = 'none';
+                header.style.transition = 'none';
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (!isDragging) return;
+                const deltaY = startY - e.clientY;
+                const newHeight = Math.min(Math.max(60 + (deltaY / window.innerHeight) * 100, 60), 85);
+                updatePanelHeight(newHeight);
+            });
+
+            document.addEventListener('mouseup', function() {
+                if (!isDragging) return;
+                isDragging = false;
+                panel.style.transition = 'height 0.3s ease-out';
+                header.style.transition = 'height 0.3s ease-out';
+                const currentHeight = parseFloat(panel.style.height);
+                const snapHeight = currentHeight > 72.5 ? 85 : 60;
+                updatePanelHeight(snapHeight);
+            });
+        });
+
+        // Update button state function
+        function updateButtonState(button, isEnabled) {
+            button.disabled = !isEnabled;
+            button.classList.toggle('disabled', !isEnabled);
+        }
+
+        // Initialize buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            const createGardenButton = document.getElementById('create-garden-button');
+            if (createGardenButton) {
+                updateButtonState(createGardenButton, false);
+            }
+        });
+
+        // 添加结果页面的滑动面板功能
+        const resultPanel = document.getElementById('result-sliding-panel');
+        let startY = 0;
+        let startHeight = 45;
+        let isDragging = false;
+
+        function updateResultPanelHeight(height) {
+            if (height >= 45 && height <= 90) {
+                resultPanel.style.height = `${height}%`;
+            }
+        }
+
+        resultPanel.addEventListener('touchstart', function(e) {
+            isDragging = true;
+            startY = e.touches[0].clientY;
+            resultPanel.style.transition = 'none';
+        });
+
+        resultPanel.addEventListener('touchmove', function(e) {
+            if (!isDragging) return;
+            const deltaY = startY - e.touches[0].clientY;
+            const newHeight = Math.min(Math.max(45 + (deltaY / window.innerHeight) * 100, 45), 90);
+            updateResultPanelHeight(newHeight);
+        });
+
+        resultPanel.addEventListener('touchend', function() {
+            isDragging = false;
+            resultPanel.style.transition = 'height 0.3s ease-out';
+            const currentHeight = parseFloat(resultPanel.style.height);
+            const snapHeight = currentHeight > 67.5 ? 90 : 45;
+            updateResultPanelHeight(snapHeight);
+        });
+
+        // 添加鼠标支持
+        resultPanel.addEventListener('mousedown', function(e) {
+            isDragging = true;
+            startY = e.clientY;
+            resultPanel.style.transition = 'none';
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+            const deltaY = startY - e.clientY;
+            const newHeight = Math.min(Math.max(45 + (deltaY / window.innerHeight) * 100, 45), 90);
+            updateResultPanelHeight(newHeight);
+        });
+
+        document.addEventListener('mouseup', function() {
+            if (!isDragging) return;
+            isDragging = false;
+            resultPanel.style.transition = 'height 0.3s ease-out';
+            const currentHeight = parseFloat(resultPanel.style.height);
+            const snapHeight = currentHeight > 67.5 ? 90 : 45;
+            updateResultPanelHeight(snapHeight);
+        });
+    </script>
+</body>
+</html> 
