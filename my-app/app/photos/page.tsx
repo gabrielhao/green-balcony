@@ -36,8 +36,8 @@ export default function PhotosPage() {
     if (!files || files.length === 0) return;
     
     // Check max photos limit
-    if (photos.length >= 6) {
-      setUploadError('Maximum 6 photos allowed');
+    if (photos.length >= 3) {
+      setUploadError('Maximum 3 photos allowed');
       return;
     }
     
@@ -61,8 +61,8 @@ export default function PhotosPage() {
   // Handle take photo
   const handleTakePhoto = async () => {
     // Check max photos limit
-    if (photos.length >= 6) {
-      setUploadError('Maximum 6 photos allowed');
+    if (photos.length >= 3) {
+      setUploadError('Maximum 3 photos allowed');
       return;
     }
     
