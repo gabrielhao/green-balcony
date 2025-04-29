@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { PhotoData } from '@/context/app-context';
+import { BlobServiceClient, BlockBlobClient } from '@azure/storage-blob';
 
 interface UsePhotoUploadReturn {
   photos: PhotoData[];
@@ -34,9 +35,11 @@ export function usePhotoUpload(): UsePhotoUploadReturn {
       // 创建图片预览
       const preview = await createImagePreview(file);
       
-      // 模拟上传到服务器的过程
-      // 在实际应用中，这里会调用API上传图片到服务器
-      const uploadedUrl = await mockUploadToServer(file);
+      // 上传到Azure Blob Storage
+      const uploadedUrl = await uploadToAzureBlob(file);
+      
+      // Debug information
+      console.log('Uploaded image URL:', uploadedUrl);
       
       const newPhoto: PhotoData = {
         id: Date.now().toString(),
@@ -99,13 +102,49 @@ export function usePhotoUpload(): UsePhotoUploadReturn {
     });
   };
 
-  // 模拟上传到服务器
-  const mockUploadToServer = async (file: File): Promise<string> => {
-    // 模拟上传延迟
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // 返回本地预览URL（在实际应用中这将是服务器URL）
-    return URL.createObjectURL(file);
+  // 上传到Azure Blob Storage
+  /**
+ * Uploads a file to Azure Blob Storage container "images"
+ * @param file - The File object to be uploaded
+ * @returns The URL of the uploaded blob
+ * @throws Error if upload fails
+ */
+  const uploadToAzureBlob = async (file: File): Promise<string> => {
+    try {
+      // Get SAS token from environment variables
+      const sasToken = process.env.NEXT_PUBLIC_AZURE_STORAGE_SAS_TOKEN;
+      if (!sasToken) {
+        throw new Error('Azure Storage SAS token is not configured');
+      }
+
+      // Define the Storage Account URL
+      const storageAccountUrl = "https://hackthonhub6837342568.blob.core.windows.net";
+
+      // Create a BlobServiceClient
+      const blobServiceClient = new BlobServiceClient(`${storageAccountUrl}?${sasToken}`);
+
+      // Get a reference to the container
+      const containerClient = blobServiceClient.getContainerClient("images");
+
+      // Create a unique name for the blob
+      const blobName = `${Date.now()}-${file.name}`;
+
+      // Get a block blob client
+      const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+
+      // Upload the file to the container
+      const uploadBlobResponse = await blockBlobClient.uploadData(file, {
+        blobHTTPHeaders: { blobContentType: file.type }
+      });
+
+      console.log(`File uploaded successfully. Request ID: ${uploadBlobResponse.requestId}`);
+
+      // Return the file URL
+      return blockBlobClient.url;
+    } catch (error) {
+      console.error("Error uploading file:", error instanceof Error ? error.message : 'Unknown error');
+      throw new Error('Failed to upload file to Azure Blob Storage');
+    }
   };
 
   // 模拟拍照

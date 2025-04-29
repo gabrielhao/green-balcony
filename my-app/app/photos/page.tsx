@@ -116,7 +116,7 @@ export default function PhotosPage() {
             {hasPhotos && (
               <div className="photos-count flex items-center gap-2 mb-4 text-primary text-sm">
                 <i className="ri-image-line text-lg"></i>
-                <span>{formattedPhotos.length} of 6 photos added</span>
+                <span>{formattedPhotos.length} of 3 photos added</span>
               </div>
             )}
             
@@ -135,7 +135,7 @@ export default function PhotosPage() {
                   onDelete={handleDelete}
                   onAdd={handleFileInputClick}
                   isLoading={isLoading}
-                  maxPhotos={6}
+                  maxPhotos={3}
                 />
                 
                 <button
