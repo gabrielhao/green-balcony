@@ -93,6 +93,10 @@ export default function LoadingPage() {
         //verify data is not empty
         const plant_recommendations = data.plant_recommendations
         const garden_image_url = data.garden_image_url
+
+        console.log('Plant recommendations:', plant_recommendations);
+        console.log('Garden image URL:', garden_image_url);
+        
         if (!plant_recommendations || plant_recommendations.length === 0) {
           throw new Error('No plant recommendations received');
         }
