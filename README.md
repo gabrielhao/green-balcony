@@ -28,7 +28,8 @@ cd green-balcony
 
 2. Install dependencies:
 ```bash
-npm install
+cd my-app
+pnpm install
 ```
 
 3. Create a `.env.local` file in the root directory of my-app directory with the following variables:
@@ -37,7 +38,7 @@ NEXT_PUBLIC_AZURE_STORAGE_SAS_TOKEN=your_azure_storage_sas_token
 BACKEND_API_ENDPOINT=your_backend_api_endpoint
 ```
 
-4. Start the development server:
+4. Start the development server under my-app directory:
 ```bash
 npm run dev
 # or
