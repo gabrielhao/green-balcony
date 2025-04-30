@@ -14,13 +14,16 @@ As newcomers to gardening, we struggled to figure out which plants would survive
 ### Design Key Principles
 To make urban gardening accessible, even for complete beginners, we focused on three key principles:
 
-- Simplicity First
+- **Simplicity First**
+
 The user experience is designed to be beginner-friendly. Users can simply upload a photo and share their location; the AI handles the rest, identifying suitable plants based on environmental conditions.
 
-- AI-Assisted Recommendations
+- **AI-Assisted Recommendations**
+
 We use AI to analyze balcony conditions and suggest appropriate plants. This reduces the need for users to understand complex gardening concepts upfront.
 
-- Expert-Backed Stability
+- **Expert-Backed Stability**
+
 To prevent hallucinations and ensure consistent, trustworthy results, we collaborated with gardening experts. We developed structured question lists and carefully designed prompts to guide the AI toward reliable responses.
 
 
