@@ -40,12 +40,14 @@ interface AppState {
   photos: PhotoData[];
   preferences: PlantPreferences;
   results: PlantResult[];
+  gardenImageUrl: string;
   setLocation: (data: LocationData) => void;
   addPhoto: (photo: PhotoData) => void;
   removePhoto: (id: string) => void;
   clearPhotos: () => void;
   setPreferences: (prefs: PlantPreferences) => void;
   setResults: (results: PlantResult[]) => void;
+  setGardenImageUrl: (url: string) => void;
   goToStep: (step: number) => void;
 }
 
@@ -73,6 +75,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     winterType: null
   });
   const [results, setResultsState] = useState<PlantResult[]>([]);
+  const [gardenImageUrl, setGardenImageUrlState] = useState<string>('');
 
   // 设置位置数据
   const setLocation = (data: LocationData) => {
@@ -104,6 +107,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setResultsState(newResults);
   };
 
+  // 设置花园图片URL
+  const setGardenImageUrl = (url: string) => {
+    setGardenImageUrlState(url);
+  };
+
   // 设置当前步骤
   const goToStep = (step: number) => {
     setCurrentStep(step);
@@ -117,12 +125,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         photos,
         preferences,
         results,
+        gardenImageUrl,
         setLocation,
         addPhoto,
         removePhoto,
         clearPhotos,
         setPreferences,
         setResults,
+        setGardenImageUrl,
         goToStep
       }}
     >

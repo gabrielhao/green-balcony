@@ -10,47 +10,30 @@ import {
 } from '@/components/shared';
 import { useAppContext, STEPS } from '@/context/app-context';
 
-// 示例植物数据
-const recommendedPlants = [
-  {
-    id: 'plant1',
-    name: 'Parsley',
-    location: 'Right side of planter',
-    description: 'Tolerates partial shade well, aromatic and versatile in cooking',
-    image: '/assets/plants/parsley.jpg'
-  },
-  {
-    id: 'plant2',
-    name: 'Cilantro/Coriander',
-    location: 'Left side of planter',
-    description: 'Tolerates partial shade well, aromatic and versatile in cooking',
-    image: '/assets/plants/cilantro.jpg'
-  },
-  {
-    id: 'plant3',
-    name: 'Mint',
-    location: 'Center back of planter',
-    description: 'Thrives in most conditions, fragrant, great for teas and cocktails',
-    image: '/assets/plants/mint.jpg'
-  },
-  {
-    id: 'plant4',
-    name: 'Basil',
-    location: 'Center front of planter',
-    description: 'Loves sunshine, perfect companion for tomatoes in cooking',
-    image: '/assets/plants/basil.jpg'
-  }
-];
+interface Plant {
+  id: string;
+  name: string;
+  location: string;
+  description: string;
+  image: string;
+}
 
 export default function ResultsPage() {
   const router = useRouter();
-  const { results, goToStep } = useAppContext();
+  const { results, goToStep, photos, preferences, location } = useAppContext();
   const [fullImageUrl, setFullImageUrl] = useState<string | null>(null);
+  const [gardenImageUrl, setGardenImageUrl] = useState<string>('');
+  const [recommendedPlants, setRecommendedPlants] = useState<Plant[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   // 如果没有结果，重定向到偏好页面
   useEffect(() => {
     if (results.length === 0) {
       router.push('/preferences');
+    } else {
+      setRecommendedPlants(results);
+      setIsLoading(false);
     }
   }, [results, router]);
   
@@ -81,6 +64,30 @@ export default function ResultsPage() {
     alert('园艺计划保存成功！');
   };
   
+  if (isLoading) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-gray-100 p-8">
+        <DeviceFrame>
+          <div className="h-full flex items-center justify-center">
+            <p>Generating your garden plan...</p>
+          </div>
+        </DeviceFrame>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-gray-100 p-8">
+        <DeviceFrame>
+          <div className="h-full flex items-center justify-center">
+            <p className="text-red-500">Error: {error}</p>
+          </div>
+        </DeviceFrame>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-100 p-8">
       <DeviceFrame>
@@ -88,10 +95,10 @@ export default function ResultsPage() {
           {/* Preview image (fixed) */}
           <div className="relative h-[60%] bg-black">
             <img 
-              src="/assets/balcony_preview.png" 
+              src={`${gardenImageUrl}${process.env.NEXT_PUBLIC_AZURE_STORAGE_SAS_TOKEN}`} 
               alt="AI generated garden preview"
               className="w-full h-full object-cover"
-              onClick={() => showFullImage('/assets/balcony_preview.png')}
+              onClick={() => showFullImage(`${gardenImageUrl}${process.env.NEXT_PUBLIC_AZURE_STORAGE_SAS_TOKEN}`)}
             />
           </div>
           
@@ -103,7 +110,7 @@ export default function ResultsPage() {
           >
             <div className="px-8 pb-32 pt-6">
               {/* Plant list */}
-              {results.map(plant => (
+              {recommendedPlants.map(plant => (
                 <PlantCard 
                   key={plant.id}
                   plant={plant}
