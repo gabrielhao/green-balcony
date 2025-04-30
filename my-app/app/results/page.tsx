@@ -112,7 +112,7 @@ export default function ResultsPage() {
               {/* Plant list */}
               {recommendedPlants.map(plant => (
                 <PlantCard 
-                  //key={plant.id}
+                  key={plant.id}
                   plant={plant}
                   onMoreInfoClick={handlePlantDetail}
                 />
