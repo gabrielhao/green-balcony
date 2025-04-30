@@ -20,9 +20,8 @@ interface Plant {
 
 export default function ResultsPage() {
   const router = useRouter();
-  const { results, goToStep, photos, preferences, location } = useAppContext();
+  const { results, goToStep, photos, preferences, location, gardenImageUrl } = useAppContext();
   const [fullImageUrl, setFullImageUrl] = useState<string | null>(null);
-  const [gardenImageUrl, setGardenImageUrl] = useState<string>('');
   const [recommendedPlants, setRecommendedPlants] = useState<Plant[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
