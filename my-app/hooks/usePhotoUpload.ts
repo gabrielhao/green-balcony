@@ -102,7 +102,6 @@ export function usePhotoUpload(): UsePhotoUploadReturn {
     });
   };
 
-  // 上传到Azure Blob Storage
   /**
  * Uploads a file to Azure Blob Storage container "images"
  * @param file - The File object to be uploaded

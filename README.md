@@ -14,117 +14,117 @@ Green Balcony is a web application that helps users plan and visualize their ide
 ## Prerequisites
 
 - Node.js (v18 or later)
+- Python 3.9
 - npm or yarn
 - Azure Storage Account (for image storage)
-- Backend API endpoint (for garden plan generation)
-
-## Setup
-
-1. Clone the repository:
-```bash
-git clone [repository-url]
-cd green-balcony
-```
-
-2. Install dependencies:
-```bash
-cd my-app
-pnpm install
-```
-
-3. Create a `.env.local` file in the root directory of my-app directory with the following variables:
-```env
-NEXT_PUBLIC_AZURE_STORAGE_SAS_TOKEN=your_azure_storage_sas_token
-BACKEND_API_ENDPOINT=your_backend_api_endpoint
-```
-
-4. Start the development server under my-app directory:
-```bash
-npm run dev
-# or
-pnpm dev
-```
-
-The application will be available at `http://localhost:3000`
-
-## Environment Variables
-
-- `NEXT_PUBLIC_AZURE_STORAGE_SAS_TOKEN`: SAS token for Azure Blob Storage access
-- `BACKEND_API_ENDPOINT`: URL of the backend API for garden plan generation
+- Azure Content Safety service
+- Azure AI Foundry service(for deployment of models)
 
 ## Project Structure
 
 ```
 green-balcony/
-├── my-app/
-│   ├── app/                  # Next.js app directory
-│   │   ├── api/             # API routes
-│   │   ├── loading/         # Loading page
-│   │   ├── preferences/     # User preferences page
-│   │   ├── results/         # Results display page
-│   │   └── ...
-│   ├── components/          # Reusable components
-│   ├── context/             # React context providers
-│   ├── hooks/               # Custom React hooks
+├── my-app/                  # Frontend Next.js app
+│   ├── app/                # Next.js app directory
+│   ├── components/         # React components
+│   ├── context/           # React context providers
 │   └── ...
-├── public/                  # Static assets
-└── ...
+├── backend/                # Python backend
+│   ├── api/               # API routes
+│   ├── models/            # Data models
+│   ├── services/          # Business logic
+│   ├── utils/             # Utility functions
+│   ├── requirements.txt   # Python dependencies
+│   └── main.py           # Entry point
+└── README.md
 ```
 
-## Usage Guide
+## Setup
 
-1. **Upload Photos**
-   - Click the upload button to add photos of your balcony
-   - Photos are automatically processed and stored in Azure Blob Storage
-
-2. **Set Preferences**
-   - Select your plant preferences (type, maintenance level, etc.)
-   - Choose your location for climate-appropriate recommendations
-
-3. **Generate Plan**
-   - The app will process your inputs and generate a garden plan
-   - A loading screen will show gardening tips while processing
-
-4. **View Results**
-   - See your AI-generated garden visualization
-   - Browse recommended plants with detailed information
-   - Save or modify your garden plan
-
-## API Integration
-
-The application communicates with a backend API that:
-- Processes uploaded images
-- Generates garden visualizations
-- Provides plant recommendations based on:
-  - User preferences
-  - Location data
-  - Image analysis
-
-API Request Format:
-```json
-{
-  "image_urls": ["url1", "url2", ...],
-  "user_preferences": {
-    "growType": "ornamental",
-    "subType": "flowers",
-    "cycleType": "perennial",
-    "winterType": "outdoors"
-  },
-  "location": "New York, NY"
-}
+1. Clone the repository:
+```bash
+git clone https://github.com/gabrielhao/green-balcony.git
+cd green-balcony
 ```
 
-## Contributing
+2. Frontend Setup:
+```bash
+cd my-app
+pnpm install
+```
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+3. Backend Setup:
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+```
 
-## License
+4. Create a `.env.local` file in the my-app directory:
+```env
+NEXT_PUBLIC_AZURE_STORAGE_SAS_TOKEN=your_azure_storage_sas_token
+```
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+5. Create a `.env` file in the backend directory:
+```env
+AZURE_STORAGE_CONNECTION_STRING=your_azure_storage_connection_string
+AZURE_STORAGE_CONTAINER_NAME=your_container_name
+AZURE_CONTENT_SAFETY_ENDPOINT=your_azure_content_safety_endpoint
+AZURE_CONTENT_SAFETY_KEY=your_azure_content_safety_key
+OPENAI_API_KEY=your_openai_api_key
+AZURE_OPENAI_ENDPOINT=your_azure_openai_endpoint
+AZURE_OPENAI_API_KEY=your_azure_openai_api_key
+AZURE_MODEL_NAME=your_azure_model_name
+AZURE_DALLE_API_KEY=your_azure_dalle_api_key
+AZURE_STORAGE_ACCOUNT_NAME=your_azure_storage_account_name
+AZURE_STORAGE_ACCOUNT_KEY=your_azure_storage_account_key
+LANGSMITH_TRACING=your_langsmith_tracing
+LANGSMITH_ENDPOINT=your_langsmith_endpoint
+LANGSMITH_API_KEY=your_langsmith_api_key
+LANGSMITH_PROJECT=your_langsmith_project
+```
+
+## Start application
+
+1. Start the backend server:
+```bash
+cd backend
+python src/run_api.py
+```
+
+2. Start the frontend development server:
+```bash
+cd my-app
+pnpm dev
+```
+
+The application will be available at `http://localhost:3000`
+
+3. Access the application:
+- Frontend: `http://localhost:3000`
+- Backend API: `http://localhost:8000`
+
+## Environment Variables
+
+### Frontend
+- `NEXT_PUBLIC_AZURE_STORAGE_SAS_TOKEN`: SAS token for Azure Blob Storage access
+
+### Backend
+- `AZURE_STORAGE_CONNECTION_STRING`: Azure Storage connection string
+- `AZURE_STORAGE_CONTAINER_NAME`: Azure Storage container name
+- `AZURE_CONTENT_SAFETY_ENDPOINT`: Azure Content Safety API endpoint
+- `AZURE_CONTENT_SAFETY_KEY`: Azure Content Safety API key
+- `OPENAI_API_KEY`: OpenAI API key
+- `AZURE_OPENAI_ENDPOINT`: Azure OpenAI endpoint
+- `AZURE_OPENAI_API_KEY`: Azure OpenAI API key
+- `AZURE_MODEL_NAME`: Azure OpenAI model name
+- `AZURE_STORAGE_ACCOUNT_NAME`: Azure Storage account name
+- `AZURE_STORAGE_ACCOUNT_KEY`: Azure Storage account key
+- `LANGSMITH_TRACING`: LangSmith tracing flag
+- `LANGSMITH_ENDPOINT`: LangSmith endpoint
+- `LANGSMITH_API_KEY`: LangSmith API key
+- `LANGSMITH_PROJECT`: LangSmith project name
 
 ## Support
 
