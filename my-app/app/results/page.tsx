@@ -94,10 +94,10 @@ export default function ResultsPage() {
           {/* Preview image (fixed) */}
           <div className="relative h-[60%] bg-black">
             <img 
-              src={`${gardenImageUrl}${process.env.NEXT_PUBLIC_AZURE_STORAGE_SAS_TOKEN}`} 
+              src={`${gardenImageUrl}?${process.env.NEXT_PUBLIC_AZURE_STORAGE_SAS_TOKEN}`} 
               alt="AI generated garden preview"
               className="w-full h-full object-cover"
-              onClick={() => showFullImage(`${gardenImageUrl}${process.env.NEXT_PUBLIC_AZURE_STORAGE_SAS_TOKEN}`)}
+              onClick={() => showFullImage(`${gardenImageUrl}?${process.env.NEXT_PUBLIC_AZURE_STORAGE_SAS_TOKEN}`)}
             />
           </div>
           
