@@ -1,15 +1,15 @@
-# 🌱🌻Green Balcony
+# 🌱🌻Green Balcony - AI-Powered Garden Planning App
 ## 1️⃣ Project Background
 In Berlin, we were amazed by how green the city is — gardens are everywhere, from schools to balconies. This early and widespread connection to plants makes cities cooler, healthier, and more vibrant.
 
 As newcomers to gardening, we struggled to figure out which plants would survive on our specific balconies. Online info was overwhelming and generic. This project helps urban residents—especially beginners—discover the right plants for their unique spaces, starting with their own balconies. 
 
-![Flowchart](./assert/flowchart.png)
+![Flowchart](./assets/flowchart.png)
 
 ## 2️⃣ User Interaction
-![UI](./assert/ui_gif.gif)
+![UI](./assets/ui_gif.gif)
 
-![User Guide](./assert/user.png)
+![User Guide](./assets/user.png)
 
 ### Design Key Principles
 To make urban gardening accessible, even for complete beginners, we focused on three key principles:
@@ -28,7 +28,7 @@ To prevent hallucinations and ensure consistent, trustworthy results, we collabo
 
 ### Architecture Components
 
-![Architecture](./assert/architecture_diagram.png)
+![Architecture](./assets/architecture_diagram.png)
 
 #### 🪴 Client & API
 - **Frontend Application**: User interface for inputting balcony images,garden preferences.
@@ -61,19 +61,19 @@ The core functionality resides in the **Garden Graph**, which manages garden sta
 
 ### 4.1 - Setup
 
-STEP 1: Clone the repository:
+🪴 STEP 1: Clone the repository:
 ```bash
 git clone https://github.com/gabrielhao/green-balcony.git
 cd green-balcony
 ```
 
-STEP 2: Frontend Setup:
+🪴 STEP 2: Frontend Setup:
 ```bash
 cd my-app
 pnpm install
 ```
 
-STEP 3: Backend Setup:
+🪴 STEP 3: Backend Setup:
 ```bash
 cd backend
 python -m venv venv
@@ -81,12 +81,12 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-STEP 4: Create a `.env.local` file in the my-app directory:
+🪴 STEP 4: Create a `.env.local` file in the my-app directory:
 ```env
 NEXT_PUBLIC_AZURE_STORAGE_SAS_TOKEN=your_azure_storage_sas_token
 ```
 
-STEP 5: Create a `.env` file in the backend directory:
+🪴 STEP 5: Create a `.env` file in the backend directory:
 ```env
 AZURE_STORAGE_CONNECTION_STRING=your_azure_storage_connection_string
 AZURE_STORAGE_CONTAINER_NAME=your_container_name
@@ -107,13 +107,13 @@ LANGSMITH_PROJECT=your_langsmith_project
 
 ### 4.2 - Start application
 
-STEP 1: Start the backend server:
+🪴 STEP 1: Start the backend server:
 ```bash
 cd backend
 python src/run_api.py
 ```
 
-STEP 2: Start the frontend development server:
+🪴 STEP 2: Start the frontend development server:
 ```bash
 cd my-app
 pnpm dev
@@ -121,6 +121,6 @@ pnpm dev
 
 The application will be available at `http://localhost:3000`
 
-STEP 3: Access the application:
+🪴 STEP 3: Access the application:
 - Frontend: `http://localhost:3000`
 - Backend API: `http://localhost:8000`
