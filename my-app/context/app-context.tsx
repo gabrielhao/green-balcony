@@ -35,6 +35,11 @@ export interface PlantResult {
   harvestingTips: string;
 }
 
+export interface PlantImage {
+  name: string;
+  image_url: string;
+}
+
 // 定义应用状态类型
 interface AppState {
   currentStep: number;
@@ -42,6 +47,7 @@ interface AppState {
   photos: PhotoData[];
   preferences: PlantPreferences;
   results: PlantResult[];
+  plantImages: PlantImage[];
   gardenImageUrl: string;
   setLocation: (data: LocationData) => void;
   addPhoto: (photo: PhotoData) => void;
@@ -50,7 +56,8 @@ interface AppState {
   setPreferences: (prefs: PlantPreferences) => void;
   setResults: (results: PlantResult[]) => void;
   setGardenImageUrl: (url: string) => void;
-  goToStep: (step: number) => void;
+  setPlantImages: (images: PlantImage[]) => void;
+  goToStep: (step: number) => void; 
 }
 
 // 创建Context
@@ -78,6 +85,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   });
   const [results, setResultsState] = useState<PlantResult[]>([]);
   const [gardenImageUrl, setGardenImageUrlState] = useState<string>('');
+  const [plantImages, setPlantImagesState] = useState<PlantImage[]>([]);
 
   // 设置位置数据
   const setLocation = (data: LocationData) => {
@@ -114,6 +122,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setGardenImageUrlState(url);
   };
 
+  // 设置植物图片
+  const setPlantImages = (images: PlantImage[]) => {
+    setPlantImagesState(images);
+  };
+
   // 设置当前步骤
   const goToStep = (step: number) => {
     setCurrentStep(step);
@@ -127,6 +140,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         photos,
         preferences,
         results,
+        plantImages,
         gardenImageUrl,
         setLocation,
         addPhoto,
@@ -135,6 +149,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setPreferences,
         setResults,
         setGardenImageUrl,
+        setPlantImages,
         goToStep
       }}
     >

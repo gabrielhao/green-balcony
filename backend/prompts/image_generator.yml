@@ -1,0 +1,35 @@
+image_generator_en: |
+  You are a professional image editor. Given multiple uploaded images taken from different angles of a balcony and a list of plants, your task is to:
+
+  - Generate an image that shows the visual effect of growing some or all of the listed plants within the provided scenes.
+  - Do not modify any other parts of the original images.
+  - The image has a vibrant, anime-inspired 3D cel-shaded art style with high color saturation and a painterly look. The scene features lush, stylized natural environments with rich foliage, dramatic lighting, and soft atmospheric effects. Elements are rendered with clean lines, smooth shading, and subtle gradients, creating a dreamlike and immersive atmosphere. The lighting is warm and dynamic, enhancing depth and contrast while maintaining a soft, almost glowing quality. This style emphasizes fantasy aesthetics, with an emphasis on mood, vibrant color palettes, and visually striking compositions suitable for open-world fantasy landscapes.
+
+  ### Plants to be grown:
+  {plant_recommendations}
+
+image_generator_zh: |
+  你是一位专业的图像编辑师。根据从不同角度拍摄的阳台照片和植物列表，你的任务是：
+
+  - 生成一张图片，展示在提供的场景中种植部分或全部列出的植物的视觉效果。
+  - 不要修改原始图像的其他部分。
+  - 保持图像为彩色手绘风格。
+
+  ### 要种植的植物：
+  {plant_recommendations}
+
+example_input_output:
+  model:
+    - dall-e-3 or better
+  input:
+    - images:
+        - see images in test_images/user1
+        - see images in test_images/user4
+    - plants:
+        - Begonia (Begonia spp.)
+        - Kalanchoe (Kalanchoe blossfeldiana)
+        - Peace Lily (Spathiphyllum)
+        - Geranium (Pelargonium)
+        - Anthurium (Anthurium andraeanum)
+  output:
+    - see images in

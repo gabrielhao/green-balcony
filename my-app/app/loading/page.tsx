@@ -46,7 +46,7 @@ import { useAppContext, STEPS } from '@/context/app-context';
 
 export default function LoadingPage() {
   const router = useRouter();
-  const { photos, preferences, location, setResults, setGardenImageUrl } = useAppContext();
+  const { photos, preferences, location, setResults, setGardenImageUrl, setPlantImages } = useAppContext();
   const apiCalledRef = useRef(false);
   
   // Gardening tips
@@ -75,8 +75,14 @@ export default function LoadingPage() {
         };
         
         console.log('Request body:', JSON.stringify(requestBody, null, 2));
+
+        const endpoint = process.env.NEXT_PUBLIC_BACKEND_API_ENDPOINT; 
+
+        if (!endpoint) {
+          throw new Error('Backend API endpoint is not defined');
+        }
         
-        const response = await fetch("http://localhost:8000/api/garden_plan", {
+        const response = await fetch(endpoint, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -85,7 +91,20 @@ export default function LoadingPage() {
         });
 
         if (!response.ok) {
-          throw new Error('Failed to generate garden plan');
+          const errorText = await response.text();
+          console.error('API Error:', {
+            status: response.status,
+            statusText: response.statusText,
+            body: errorText
+          });
+          throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+        }
+
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          const text = await response.text();
+          console.error('Invalid response type:', contentType, text);
+          throw new Error('Invalid response type from server');
         }
 
         const data = await response.json();
@@ -93,10 +112,11 @@ export default function LoadingPage() {
         //verify data is not empty
         const plant_recommendations = data.plant_recommendations
         const garden_image_url = data.garden_image_url
+        const plant_images = data.plant_images
 
         console.log('Plant recommendations:', plant_recommendations);
         console.log('Garden image URL:', garden_image_url);
-        
+        console.log('Plant images:', plant_images);
         if (!plant_recommendations || plant_recommendations.length === 0) {
           throw new Error('No plant recommendations received');
         }
@@ -104,10 +124,14 @@ export default function LoadingPage() {
         if (!garden_image_url) {
           throw new Error('No garden image URL received'); 
         }
-      
+
+        if (!plant_images || plant_images.length === 0) {
+          throw new Error('No plant images received');
+        }
 
         setResults(plant_recommendations);
         setGardenImageUrl(garden_image_url);
+        setPlantImages(plant_images);
         router.push('/results');
       } catch (err) {
         console.error('生成计划时出错:', err);
@@ -118,7 +142,7 @@ export default function LoadingPage() {
     };
 
     generateGardenPlan();
-  }, [photos, preferences, location, setResults, setGardenImageUrl, router]);
+  }, [photos, preferences, location, setResults, setGardenImageUrl, setPlantImages, router]);
   
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-100 p-8">

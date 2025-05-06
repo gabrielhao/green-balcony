@@ -1,22 +1,24 @@
-sketch_generator_en: |
-    You are a professional image editor. Given multiple uploaded images taken from different angles and a list of plants, your task is to:
+plant_image_generator_en: |
+    You are a professional image editor. Given name of a plant, your task is to:
 
-    - Generate an image that shows the visual effect of growing some or all of the listed plants within the provided scenes.
-    - Do not modify any other parts of the original images.
+    - Generate an image that shows the visual effect of growing the plant.
     - The image has a vibrant, anime-inspired 3D cel-shaded art style with high color saturation and a painterly look. The scene features lush, stylized natural environments with rich foliage, dramatic lighting, and soft atmospheric effects. Elements are rendered with clean lines, smooth shading, and subtle gradients, creating a dreamlike and immersive atmosphere. The lighting is warm and dynamic, enhancing depth and contrast while maintaining a soft, almost glowing quality. This style emphasizes fantasy aesthetics, with an emphasis on mood, vibrant color palettes, and visually striking compositions suitable for open-world fantasy landscapes.
+    - The image should be a single plant, not a scene.
+    - The background should be a white background.
 
-    ### Plants to be grown:
-    {plant_recommendations}
+    ### Plant to be drawn:
+    {plant_name}
 
-sketch_generator_zh: |
-    你是一名专业的图像编辑。根据从不同角度拍摄的多张上传图片和一份植物列表，你的任务是：
+plant_image_generator_zh: |
+    你是一名专业的图像编辑。根据植物名称，你的任务是：
 
-    - 生成一张展示在提供的场景中种植部分或全部列出植物的视觉效果的图片。
-    - 不要修改原始图片的其他部分。
-    - 保持图像为彩色手绘风格。
+    - 生成一张展示植物的视觉效果的图片。
+    - 图片风格为彩色手绘风格。
+    - 图片
+    - 图片背景为白色。
 
-    ### 要种植的植物：
-    {plants}
+    ### 要绘制的植物：
+    {plant_name}
 
 example_input_output:
     model:

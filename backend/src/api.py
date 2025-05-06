@@ -54,6 +54,7 @@ class GardenPlanRequest(BaseModel):
 class GardenPlanResponse(BaseModel):
     garden_image_url: str
     plant_recommendations: List[Dict[Any, Any]]
+    plant_images: List[Dict[str, str]]
 
 @app.post("/api/garden_plan", response_model=GardenPlanResponse)
 async def create_garden_plan(request: GardenPlanRequest):
@@ -134,7 +135,8 @@ async def create_garden_plan(request: GardenPlanRequest):
         # Return the results
         return GardenPlanResponse(
             garden_image_url=final_state['garden_image_url'],
-            plant_recommendations=final_state['plant_recommendations']
+            plant_recommendations=final_state['plant_recommendations'],
+            plant_images=final_state['plant_images']
         )
     except HTTPException:
         raise
