@@ -28,9 +28,11 @@ export interface PlantPreferences {
 export interface PlantResult {
   id: string;
   name: string;
-  location: string;
   description: string;
-  image: string;
+  growingConditions: string;
+  plantingTips: string;
+  care_tips: string;
+  harvestingTips: string;
 }
 
 // 定义应用状态类型

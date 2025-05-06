@@ -7,26 +7,35 @@ plant_recommender_en: |
     ### Environment report:
     {report}
 
-    Based on this context, please generate a list of at least 3 suitable plants that would thrive in these conditions following the JSON structure below:
+    Based on this context, please generate a list of at least 3 suitable plants (can be more than 3) that would thrive in these conditions following the JSON structure below:
     {
       "recommended_plants": [
         {
           "id": 0,
           "name": "<plantA>",
           "description": "<A description of plantA.>",
-          "care_tips": "<Care tips of plantA.>"
+          "growingConditions": "<Growing conditions of plantA.>",
+          "plantingTips": "<Planting tips of plantA.>",
+          "care_tips": "<Care tips of plantA.>",
+          "harvestingTips": "<Harvesting tips of plantA.>"
         },
         {
           "id": 1,
           "name": "<plantB>",
           "description": "<A description of plantB.>",
-          "care_tips": "<Care tips of plantB.>"
+          "growingConditions": "<Growing conditions of plantB.>",
+          "plantingTips": "<Planting tips of plantB.>",
+          "care_tips": "<Care tips of plantB.>",
+          "harvestingTips": "<Harvesting tips of plantB.>"
         },
         {
           "id": 2,
           "name": "<plantC>",
           "description": "<A description of plantC.>",
-          "care_tips": "<Care tips of plantC.>"
+          "growingConditions": "<Growing conditions of plantC.>",
+          "plantingTips": "<Planting tips of plantC.>",
+          "care_tips": "<Care tips of plantC.>",
+          "harvestingTips": "<Harvesting tips of plantC.>"
         },
         ...
       ]
@@ -47,17 +56,26 @@ plant_recommender_zh: |
       {
         "name": "<plantA>",
         "description": "<plantA的描述>",
-        "care_tips": "<plantA的护理建议>"
+        "care_tips": "<plantA的护理建议>",
+        "growingConditions": "<plantA的生长条件>",
+        "plantingTips": "<plantA的种植建议>",
+        "harvestingTips": "<plantA的收获建议>"
       },
       {
         "name": "<plantB>",
         "description": "<plantB的描述>",
-        "care_tips": "<plantB的护理建议>"
+        "care_tips": "<plantB的护理建议>",
+        "growingConditions": "<plantB的生长条件>",
+        "plantingTips": "<plantB的种植建议>",
+        "harvestingTips": "<plantB的收获建议>"
       },
       {
         "name": "<plantC>",
         "description": "<plantC的描述>",
-        "care_tips": "<plantC的护理建议>"
+        "care_tips": "<plantC的护理建议>",
+        "growingConditions": "<plantC的生长条件>",
+        "plantingTips": "<plantC的种植建议>",
+        "harvestingTips": "<plantC的收获建议>"
       },
       ...
     ]
@@ -88,27 +106,42 @@ example_input_output:
           {
             "name": "Begonia (Begonia spp.)",
             "description": "Begonias are versatile flowering plants with vibrant blooms that range in color from reds and pinks to oranges and yellows. They are well-suited for areas with indirect sunlight and can adapt to a variety of indoor or sheltered outdoor locations.",
-            "care_tips": "Place your Begonia in a spot with bright, indirect light, such as near a northwest-facing window. Water when the top inch of soil feels dry, and ensure the pot has well-draining soil to avoid waterlogging. Avoid misting leaves as this can lead to fungal issues."
+            "care_tips": "Place your Begonia in a spot with bright, indirect light, such as near a northwest-facing window. Water when the top inch of soil feels dry, and ensure the pot has well-draining soil to avoid waterlogging. Avoid misting leaves as this can lead to fungal issues.",
+            "growingConditions": "Indirect sunlight, moderate watering needs, well-draining soil",
+            "plantingTips": "Plant in a well-draining potting mix. Place in a spot with bright, indirect light, such as near a northwest-facing window.",
+            "harvestingTips": "Harvest when the flowers are in full bloom."
           },
           {
             "name": "Kalanchoe (Kalanchoe blossfeldiana)",
             "description": "Kalanchoe is a low-maintenance succulent that produces clusters of small, vibrant flowers in a variety of colors. It thrives in mildly sunny conditions and can tolerate beginner care routines.",
-            "care_tips": "Provide bright, indirect light and water every 2-3 weeks or when the soil is completely dry. Use a well-draining potting mix, preferably one formulated for cacti or succulents. Avoid overwatering, as it is the primary cause of issues for this plant."
+            "care_tips": "Provide bright, indirect light and water every 2-3 weeks or when the soil is completely dry. Use a well-draining potting mix, preferably one formulated for cacti or succulents. Avoid overwatering, as it is the primary cause of issues for this plant.",
+            "growingConditions": "Mild sunlight, moderate watering needs, well-draining soil",
+            "plantingTips": "Plant in a well-draining potting mix. Place in a spot with bright, indirect light, such as near a northwest-facing window.",
+            "harvestingTips": "Harvest when the flowers are in full bloom."
           },
           {
             "name": "Peace Lily (Spathiphyllum)",
             "description": "A popular flowering indoor plant, the Peace Lily produces elegant white flowers (spathes) and lush deep-green foliage. It adapts well to moderate light conditions and is forgiving of occasional missed waterings.",
-            "care_tips": "Position the Peace Lily in a spot with moderate to low indirect sunlight. Water when the top 1-2 inches of soil feel dry, and mist occasionally to increase humidity. Use a well-draining potting mix and avoid placing it in drafty or overly hot areas."
+            "care_tips": "Position the Peace Lily in a spot with moderate to low indirect sunlight. Water when the top 1-2 inches of soil feel dry, and mist occasionally to increase humidity. Use a well-draining potting mix and avoid placing it in drafty or overly hot areas.",
+            "growingConditions": "Moderate to low indirect sunlight, moderate watering needs, well-draining soil",
+            "plantingTips": "Plant in a well-draining potting mix. Place in a spot with bright, indirect light, such as near a northwest-facing window.",
+            "harvestingTips": "Harvest when the flowers are in full bloom."
           },
           {
             "name": "Geranium (Pelargonium)",
             "description": "Geraniums are hardy flowering plants with stunning clusters of blooms in pinks, reds, and whites. They thrive in window boxes and can handle moderate sunlight in cooler micro-climates.",
-            "care_tips": "Place in a northwest-facing window box where they receive bright light during the afternoon. Use well-draining soil, and water deeply when the top layer feels dry. Prune spent flowers and leaves to encourage new growth."
+            "care_tips": "Place in a northwest-facing window box where they receive bright light during the afternoon. Use well-draining soil, and water deeply when the top layer feels dry. Prune spent flowers and leaves to encourage new growth.",
+            "growingConditions": "Moderate sunlight, moderate watering needs, well-draining soil",
+            "plantingTips": "Plant in a well-draining potting mix. Place in a spot with bright, indirect light, such as near a northwest-facing window.",
+            "harvestingTips": "Harvest when the flowers are in full bloom."
           },
           {
             "name": "Anthurium (Anthurium andraeanum)",
             "description": "Known as the Flamingo Flower, Anthuriums are tropical plants with striking red, pink, or white bract-like flowers and patterned glossy leaves. They thrive in moderate indoor light and are forgiving of small care mishaps.",
-            "care_tips": "Anthuriums prefer medium to bright, indirect sunlight. Allow soil to dry slightly between waterings, and ensure the pot allows for good drainage. Use a humidifier or mist occasionally to replicate tropical humidity levels."
+            "care_tips": "Anthuriums prefer medium to bright, indirect sunlight. Allow soil to dry slightly between waterings, and ensure the pot allows for good drainage. Use a humidifier or mist occasionally to replicate tropical humidity levels.",
+            "growingConditions": "Moderate indoor light, moderate watering needs, well-draining soil",
+            "plantingTips": "Plant in a well-draining potting mix. Place in a spot with bright, indirect light, such as near a northwest-facing window.",
+            "harvestingTips": "Harvest when the flowers are in full bloom."
           }
         ]
       }

@@ -225,26 +225,35 @@ def generate_final_output(state: GardenState) -> GardenState:
     ### Environment information:
     {garden_info}
 
-    Based on this context, please generate a list of at least 3 suitable plants that would thrive in these conditions following the JSON structure below:
+    Based on this context, please generate a list of at least 3 suitable plants (can be more than 3) that would thrive in these conditions following the JSON structure below:
     {
-      "plant_recommendations": [
+      "recommended_plants": [
         {
-          "id": 0,
+          "id": "0",
           "name": "<plantA>",
           "description": "<A description of plantA.>",
-          "care_tips": "<Care tips of plantA.>"
+          "growingConditions": "<Growing conditions of plantA.>",
+          "plantingTips": "<Planting tips of plantA.>",
+          "care_tips": "<Care tips of plantA.>",
+          "harvestingTips": "<Harvesting tips of plantA.>"
         },
         {
-          "id": 1,
+          "id": "1",
           "name": "<plantB>",
           "description": "<A description of plantB.>",
-          "care_tips": "<Care tips of plantB.>"
+          "growingConditions": "<Growing conditions of plantB.>",
+          "plantingTips": "<Planting tips of plantB.>",
+          "care_tips": "<Care tips of plantB.>",
+          "harvestingTips": "<Harvesting tips of plantB.>"
         },
         {
-          "id": 2,
+          "id": "2",
           "name": "<plantC>",
           "description": "<A description of plantC.>",
-          "care_tips": "<Care tips of plantC.>"
+          "growingConditions": "<Growing conditions of plantC.>",
+          "plantingTips": "<Planting tips of plantC.>",
+          "care_tips": "<Care tips of plantC.>",
+          "harvestingTips": "<Harvesting tips of plantC.>"
         },
         ...
       ]
