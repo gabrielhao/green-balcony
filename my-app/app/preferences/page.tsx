@@ -112,7 +112,7 @@ export default function PreferencesPage() {
                 <SubOptionsList
                   options={perennialOptions}
                   selectedOption={preferences.winterType}
-                  onSelect={setWinterType}
+                  onSelect={(id: string) => setWinterType(id as "indoors" | "outdoors" | "")}
                   parentSelected={preferences.cycleType === 'perennial'}
                 />
                 <PreferenceCard

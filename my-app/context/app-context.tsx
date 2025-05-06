@@ -18,10 +18,10 @@ export interface PhotoData {
 
 // 定义植物偏好类型
 export interface PlantPreferences {
-  growType: 'ornamental' | 'edible' | 'both' | null;
-  subType: string | null;
-  cycleType: 'perennial' | 'annual' | null;
-  winterType: 'indoors' | 'outdoors' | null;
+  growType: 'ornamental' | 'edible' | 'both' | '';
+  subType: string | '';
+  cycleType: 'perennial' | 'annual' | '';
+  winterType: 'indoors' | 'outdoors' | '';
 }
 
 // 定义推荐植物类型

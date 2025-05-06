@@ -33,10 +33,10 @@ class Location(BaseModel):
     address: str
 
 class UserPreferences(BaseModel):
-    growType: str
-    subType: str
-    cycleType: str
-    winterType: str
+    growType: Optional[str] = None
+    subType: Optional[str] = None
+    cycleType: Optional[str] = None
+    winterType: Optional[str] = None
 
 class GardenPlanRequest(BaseModel):
     image_urls: List[str]  # Changed from HttpUrl to str to handle Azure SAS URLs
@@ -102,8 +102,8 @@ async def create_garden_plan(request: GardenPlanRequest):
         graph = build_garden_graph()
         
         # Format user preferences for the garden state
-        style_preferences = f"{request.user_preferences.growType} {request.user_preferences.subType} plants, {request.user_preferences.cycleType}, {request.user_preferences.winterType}"
-        
+        style_preferences = f"preferred grow type: {request.user_preferences.growType or ''} {request.user_preferences.subType or ''}, preferred cycle type: {request.user_preferences.cycleType or ''}, preferred winter type: {request.user_preferences.winterType or ''}".strip()
+
         # Initialize the state
         initial_state = GardenState(
             sun_exposure="",
