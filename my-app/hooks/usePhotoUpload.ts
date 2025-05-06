@@ -117,7 +117,10 @@ export function usePhotoUpload(): UsePhotoUploadReturn {
       }
 
       // Define the Storage Account URL
-      const storageAccountUrl = "https://hackthonhub6837342568.blob.core.windows.net";
+      const storageAccountUrl = process.env.NEXT_PUBLIC_AZURE_STORAGE_ACCOUNT_URL;
+      if (!storageAccountUrl) {
+        throw new Error('Azure Storage Account URL is not configured');
+      }
 
       // Create a BlobServiceClient
       const blobServiceClient = new BlobServiceClient(`${storageAccountUrl}?${sasToken}`);
