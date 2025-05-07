@@ -13,14 +13,16 @@ import { useAppContext, STEPS } from '@/context/app-context';
 interface Plant {
   id: string;
   name: string;
-  location: string;
   description: string;
-  image: string;
+  growingConditions: string;
+  plantingTips: string;
+  care_tips: string;
+  harvestingTips: string;
 }
 
 export default function ResultsPage() {
   const router = useRouter();
-  const { results, goToStep, photos, preferences, location, gardenImageUrl } = useAppContext();
+  const { results, goToStep, photos, preferences, location, gardenImageUrl, plantImages } = useAppContext();
   const [fullImageUrl, setFullImageUrl] = useState<string | null>(null);
   const [recommendedPlants, setRecommendedPlants] = useState<Plant[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -34,7 +36,7 @@ export default function ResultsPage() {
       setRecommendedPlants(results);
       setIsLoading(false);
     }
-  }, [results, router]);
+  }, [results, router, plantImages]);
   
   // 处理植物详情查看
   const handlePlantDetail = (plantName: string) => {

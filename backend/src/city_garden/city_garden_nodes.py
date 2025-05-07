@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 from io import BytesIO
 from base64 import b64decode
 from openai import OpenAI
-
+from city_garden.utils.prompt_loader import load_prompt
 load_dotenv()
 
 
@@ -311,45 +311,15 @@ def create_garden_image(state: GardenState) -> GardenState:
     The image is created by LLM. For debugging, the image is shown.
     """
     
-    load_dotenv()
-
-    def generate_image_with_gpt(balcony_description: str, image_files: List[BytesIO]) -> Optional[str]:
-        client = OpenAI()
-        try:
-            response = client.images.edit(
-                model="gpt-image-1",
-                image=image_files,
-                prompt=balcony_description
-            )
-            
-            # with open("balcony.png", "wb") as file:
-            #     file.write(b64decode(response.data[0].b64_json))
-            
-            # print("Balcony image saved.")
-            
-            image_loader = AzureImageLoader(
-                account_name=os.environ["AZURE_STORAGE_ACCOUNT_NAME"],
-                account_key=os.environ["AZURE_STORAGE_ACCOUNT_KEY"]
-            )
-            
-            image_content = response.data[0].b64_json
-            blob_name = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}-garden_image.png"
-            
-            image_url = image_loader.upload_image(b64decode(image_content), "images", blob_name)
-            state["garden_image_url"] = image_url
-            
-            print(f"Garden image URL: {state['garden_image_url']}")
-            
-            return image_content
-        
-        except Exception as err:
-            print("Error generating image:", err)
-            return None
-    
+    load_dotenv()    
     
     # Get garden information from state
     garden_image_contents = state.get('images', 'Not analyzed')
-    plant_recommendations = state.get('plant_recommendations', 'Not analyzed')
+    plant_recommendations = state.get('plant_recommendations', [])
+    
+    if not plant_recommendations:
+        print("Error: No plant recommendations found in state")
+        return state
     
     # Wrap loaded Azure images as file-like objects
     print("Wrapping loaded Azure images as file-like objects")
@@ -359,32 +329,116 @@ def create_garden_image(state: GardenState) -> GardenState:
         bio.name = f"image_{idx}.jpeg"  # <-- Give it a filename with proper extension!
         image_files.append(bio)
 
-    system_prompt = f"""
-    You are a professional image editor. Given multiple uploaded images taken from different angles of a balcony and a list of plants, your task is to:
-
-    - Generate an image that shows the visual effect of growing some or all of the listed plants within the provided scenes.
-    - Do not modify any other parts of the original images.
-    - Keep the image in colorful sketch style.
-    
-    ### Plants to be grown:
-    {plant_recommendations}
-    """
+    # Load the prompt template and format it with the plant recommendations
+    system_prompt = load_prompt('image_generator.yml', 'image_generator_en').format(
+        plant_recommendations=json.dumps(plant_recommendations, indent=2)
+    )
 
     print("Generating image with GPT")
     try:
-        response = generate_image_with_gpt(balcony_description=system_prompt, image_files=image_files)
+        response = generate_image(system_prompt, image_files)
         if response is None:
             print("Error: Failed to generate image with GPT")
             return state
             
         print("Image generated successfully with GPT")
-        state["garden_image"] = response
+        state["garden_image_url"] = response
             
     except Exception as e:
         print(f"Error during GPT image generation: {str(e)}")
         return state
             
     return state
+
+
+def create_plant_images(state: GardenState) -> GardenState:
+    """
+    Create plant images based on the plant recommendations. The image should be in colorful hand-drawn style.
+    The image is created by LLM. For debugging, the image is shown.
+    """
+    print("Creating plant images")
+    
+    # Initialize plant_images if not exists
+    if state.get('plant_images') is None:
+        state["plant_images"] = []
+    
+    plant_recommendations = state.get('plant_recommendations', 'Not analyzed')
+    # check if plant_recommendations is a list
+    if not isinstance(plant_recommendations, list):
+        print("Error: plant_recommendations is not a list")
+        return state
+    
+    # check if plant_recommendations is empty
+    if len(plant_recommendations) == 0:
+        print("Error: plant_recommendations is empty")
+        return state
+    
+    # load prompt template
+    system_prompt = load_prompt('plant_image_generator.yml', 'plant_image_generator_en')
+    
+    # create plant images
+    for plant in plant_recommendations:
+        print(f"Creating image for {plant['name']}")
+        # create plant image
+        plant_image_url = generate_image(system_prompt.format(plant_name=plant['name']), image_files=None, image_name=plant['name'])
+        state["plant_images"].append({
+            "name": plant['name'],
+            "image_url": plant_image_url
+        })
+    
+    return state
+
+def generate_image(prompt: str, image_files: Optional[List[BytesIO]] = None, image_name: str = "garden_image") -> Optional[str]:
+    """
+    Generate or edit an image using GPT.
+    
+    Args:
+        prompt (str): The prompt describing the desired image
+        image_files (Optional[List[BytesIO]]): List of image files to edit. If None, generates new image
+        image_name (str): Name for the generated image
+        
+    Returns:
+        Optional[str]: The generated image URL if successful, None otherwise
+    """
+    client = OpenAI()
+    try:
+        if image_files:
+            # Edit existing images
+            response = client.images.edit(
+                model="gpt-image-1",
+                image=image_files,
+                prompt=prompt
+            )
+        else:
+            # Generate new image
+            response = client.images.generate(
+                model="gpt-image-1",
+                prompt=prompt
+            )
+        
+        image_loader = AzureImageLoader(
+            account_name=os.environ["AZURE_STORAGE_ACCOUNT_NAME"],
+            account_key=os.environ["AZURE_STORAGE_ACCOUNT_KEY"]
+        )
+        
+        image_content = response.data[0].b64_json
+        blob_name = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}-{image_name}.png"
+        
+        image_url = image_loader.upload_image(b64decode(image_content), "images", blob_name)
+        #state[f"{image_name}_url"] = image_url
+        
+        print(f"{image_name.title()} URL: {image_url}")
+        
+        return image_url
+    
+    except Exception as err:
+        print(f"Error generating {image_name}:", err)
+        return None
+
+# Keep the old function for backward compatibility
+def generate_image_with_gpt(prompt: str, image_files: List[BytesIO], image_name: str = "garden_image") -> Optional[str]:
+    """Legacy function for image editing. Use generate_image() instead."""
+    return generate_image(prompt, image_files, image_name)
 
 def extract_value(text: str, key: str) -> Optional[str]:
     """Extract a value from text using JSON parsing.

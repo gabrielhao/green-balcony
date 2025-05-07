@@ -18,9 +18,9 @@ class GardenState(TypedDict):
     location: str
     latitude: float
     longitude: float
-    final_output: str
     compliance_check: str
     garden_image: str
     garden_image_url: str
+    plant_images: List[Dict[str, str]]
     images: List[str]
     messages: List[Dict[str, Any]]

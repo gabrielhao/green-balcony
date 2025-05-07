@@ -9,10 +9,10 @@ interface SubOption {
 
 interface UsePreferencesReturn {
   preferences: PlantPreferences;
-  setGrowType: (type: 'ornamental' | 'edible' | 'both' | null) => void;
-  setSubType: (type: string | null) => void;
-  setCycleType: (type: 'perennial' | 'annual' | null) => void;
-  setWinterType: (type: 'indoors' | 'outdoors' | null) => void;
+  setGrowType: (type: 'ornamental' | 'edible' | 'both' | '') => void;
+  setSubType: (type: string | '') => void;
+  setCycleType: (type: 'perennial' | 'annual' | '') => void;
+  setWinterType: (type: 'indoors' | 'outdoors' | '') => void;
   isComplete: boolean;
   ornamentalOptions: SubOption[];
   edibleOptions: SubOption[];
@@ -22,23 +22,23 @@ interface UsePreferencesReturn {
 export function usePlantPreferences(): UsePreferencesReturn {
   // 初始化偏好状态
   const [preferences, setPreferences] = useState<PlantPreferences>({
-    growType: null,
-    subType: null,
-    cycleType: null,
-    winterType: null
+    growType: '',
+    subType: '',
+    cycleType: '',
+    winterType: ''
   });
   
   // 设置种植类型
-  const setGrowType = (type: 'ornamental' | 'edible' | 'both' | null) => {
+  const setGrowType = (type: 'ornamental' | 'edible' | 'both' | '') => {
     setPreferences(prev => ({
       ...prev,
       growType: type,
-      subType: null // 重置子类型
+      subType: type === 'both' ? 'ornamental and edible' : '' // 如果是both，设置子类型为ornamental and edible
     }));
   };
   
   // 设置子类型
-  const setSubType = (type: string | null) => {
+  const setSubType = (type: string | '') => {
     setPreferences(prev => ({
       ...prev,
       subType: type
@@ -46,16 +46,16 @@ export function usePlantPreferences(): UsePreferencesReturn {
   };
   
   // 设置生长周期
-  const setCycleType = (type: 'perennial' | 'annual' | null) => {
+  const setCycleType = (type: 'perennial' | 'annual' | '') => {
     setPreferences(prev => ({
       ...prev,
       cycleType: type,
-      winterType: null // 重置冬季类型
+      winterType: '' // 重置冬季类型
     }));
   };
   
   // 设置冬季处理方式
-  const setWinterType = (type: 'indoors' | 'outdoors' | null) => {
+  const setWinterType = (type: 'indoors' | 'outdoors' | '') => {
     setPreferences(prev => ({
       ...prev,
       winterType: type
@@ -67,15 +67,15 @@ export function usePlantPreferences(): UsePreferencesReturn {
     // 如果选择"both"，不需要子类型
     if (preferences.growType === 'both') {
       return preferences.cycleType === 'annual' || 
-             (preferences.cycleType === 'perennial' && preferences.winterType !== null);
+             (preferences.cycleType === 'perennial' && preferences.winterType !== '');
     }
     
     // 否则需要主类型和子类型
     return (
-      preferences.growType !== null && 
-      (preferences.growType === 'both' || preferences.subType !== null) &&
+      preferences.growType !== '' && 
+      preferences.subType !== '' &&
       (preferences.cycleType === 'annual' || 
-       (preferences.cycleType === 'perennial' && preferences.winterType !== null))
+       (preferences.cycleType === 'perennial' && preferences.winterType !== ''))
     );
   };
   

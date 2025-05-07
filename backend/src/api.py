@@ -33,10 +33,10 @@ class Location(BaseModel):
     address: str
 
 class UserPreferences(BaseModel):
-    growType: str
-    subType: str
-    cycleType: str
-    winterType: str
+    growType: Optional[str] = None
+    subType: Optional[str] = None
+    cycleType: Optional[str] = None
+    winterType: Optional[str] = None
 
 class GardenPlanRequest(BaseModel):
     image_urls: List[str]  # Changed from HttpUrl to str to handle Azure SAS URLs
@@ -54,6 +54,7 @@ class GardenPlanRequest(BaseModel):
 class GardenPlanResponse(BaseModel):
     garden_image_url: str
     plant_recommendations: List[Dict[Any, Any]]
+    plant_images: List[Dict[str, str]]
 
 @app.post("/api/garden_plan", response_model=GardenPlanResponse)
 async def create_garden_plan(request: GardenPlanRequest):
@@ -101,8 +102,8 @@ async def create_garden_plan(request: GardenPlanRequest):
         graph = build_garden_graph()
         
         # Format user preferences for the garden state
-        style_preferences = f"{request.user_preferences.growType} {request.user_preferences.subType} plants, {request.user_preferences.cycleType}, {request.user_preferences.winterType}"
-        
+        style_preferences = f"preferred grow type: {request.user_preferences.growType or ''} {request.user_preferences.subType or ''}, preferred cycle type: {request.user_preferences.cycleType or ''}, preferred winter type: {request.user_preferences.winterType or ''}".strip()
+
         # Initialize the state
         initial_state = GardenState(
             sun_exposure="",
@@ -134,7 +135,8 @@ async def create_garden_plan(request: GardenPlanRequest):
         # Return the results
         return GardenPlanResponse(
             garden_image_url=final_state['garden_image_url'],
-            plant_recommendations=final_state['plant_recommendations']
+            plant_recommendations=final_state['plant_recommendations'],
+            plant_images=final_state['plant_images']
         )
     except HTTPException:
         raise

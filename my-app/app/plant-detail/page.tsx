@@ -8,12 +8,22 @@ import { useAppContext } from '@/context/app-context';
 export default function PlantDetailPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { results } = useAppContext();
+  const { results, plantImages, setPlantImages } = useAppContext();
   const plantName = searchParams.get('name');
   
   // Find the plant in results
   const plant = results.find(p => p.name === plantName);
-  
+  const plantImage = plantImages.find(p => p.name === plantName);
+
+  // Function to append SAS token to Azure blob URLs
+  const getImageUrl = (url: string | undefined) => {
+    if (!url) return '';
+    const sasToken = process.env.NEXT_PUBLIC_AZURE_STORAGE_SAS_TOKEN;
+    if (!sasToken) return url;
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}${sasToken}`;
+  };
+
   if (!plant) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-gray-100 p-8">
@@ -36,6 +46,11 @@ export default function PlantDetailPage() {
         <div className="h-full flex flex-col bg-white">
           {/* Header */}
           <div className="relative h-[40%] bg-primary-bg transition-all duration-300">
+            <img 
+              src={getImageUrl(plantImage?.image_url)} 
+              alt={`${plantImage?.name} plant`} 
+              className="w-full h-full object-cover opacity-90"
+            />
             <div className="absolute top-6 left-6">
               <IconButton 
                 icon="ri-arrow-left-line" 
