@@ -6,7 +6,7 @@ interface UsePhotoUploadReturn {
   photos: PhotoData[];
   uploadPhoto: (file: File) => Promise<PhotoData>;
   takePhoto: () => Promise<PhotoData | null>;
-  removePhoto: (id: string) => void;
+  removePhoto: (id: string, url: string) => Promise<void>;
   isLoading: boolean;
   error: string | null;
 }
@@ -87,8 +87,45 @@ export function usePhotoUpload(): UsePhotoUploadReturn {
   };
 
   // 删除照片
-  const removePhoto = (id: string): void => {
-    setPhotos(prevPhotos => prevPhotos.filter(photo => photo.id !== id));
+  const removePhoto = async (id: string, url: string): Promise<void> => {
+    try {
+      // Get SAS token from environment variables
+      const sasToken = process.env.NEXT_PUBLIC_AZURE_STORAGE_SAS_TOKEN;
+      if (!sasToken) {
+        throw new Error('Azure Storage SAS token is not configured');
+      }
+
+      // Define the Storage Account URL
+      const storageAccountUrl = process.env.NEXT_PUBLIC_AZURE_STORAGE_ACCOUNT_URL;
+      if (!storageAccountUrl) {
+        throw new Error('Azure Storage Account URL is not configured');
+      }
+
+      // Extract the blob name from the URL
+      const blobName = url.split('/').pop();
+      if (!blobName) {
+        throw new Error('Invalid blob URL');
+      }
+
+      // Create a BlobServiceClient
+      const blobServiceClient = new BlobServiceClient(`${storageAccountUrl}?${sasToken}`);
+
+      // Get a reference to the container
+      const containerClient = blobServiceClient.getContainerClient("images");
+
+      // Get a block blob client
+      const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+
+      // Delete the blob
+      await blockBlobClient.delete();
+      console.log(`Blob ${blobName} deleted successfully.`);
+
+      // Remove the photo from the local state
+      setPhotos(prevPhotos => prevPhotos.filter(photo => photo.id !== id));
+    } catch (error) {
+      console.error("Error deleting photo:", error instanceof Error ? error.message : 'Unknown error');
+      throw new Error('Failed to delete photo from Azure Blob Storage');
+    }
   };
 
   // 创建图片预览
@@ -170,4 +207,4 @@ export function usePhotoUpload(): UsePhotoUploadReturn {
     isLoading,
     error
   };
-} 
+}
