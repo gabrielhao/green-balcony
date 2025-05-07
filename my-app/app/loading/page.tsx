@@ -46,7 +46,7 @@ import { useAppContext, STEPS } from '@/context/app-context';
 
 export default function LoadingPage() {
   const router = useRouter();
-  const { photos, preferences, location, setResults, setGardenImageUrl, setPlantImages } = useAppContext();
+  const { photos, preferences, location, setResults, setGardenImageUrl, setPlantImages, removePhoto, clearPhotos } = useAppContext();
   const apiCalledRef = useRef(false);
   
   // Gardening tips
@@ -132,12 +132,17 @@ export default function LoadingPage() {
         setResults(plant_recommendations);
         setGardenImageUrl(garden_image_url);
         setPlantImages(plant_images);
+
+        //when the API call is successful, delete the photos from the state
+        photos.forEach((photo: { id: string; url: string }) => removePhoto(photo.id, photo.url));
+        clearPhotos(); // clear photos in context
+
+        // Navigate to results page
         router.push('/results');
       } catch (err) {
         console.error('生成计划时出错:', err);
         // 导航回偏好页面
-        router.push('/preferences');
-        
+        router.push('/preferences');   
       }
     };
 
