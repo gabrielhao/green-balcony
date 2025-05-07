@@ -4,6 +4,7 @@ image_generator_en: |
   - Generate an image that shows the visual effect of growing some or all of the listed plants within the provided scenes.
   - Do not modify any other parts of the original images.
   - The image has a vibrant, anime-inspired 3D cel-shaded art style with high color saturation and a painterly look. The scene features lush, stylized natural environments with rich foliage, dramatic lighting, and soft atmospheric effects. Elements are rendered with clean lines, smooth shading, and subtle gradients, creating a dreamlike and immersive atmosphere. The lighting is warm and dynamic, enhancing depth and contrast while maintaining a soft, almost glowing quality. This style emphasizes fantasy aesthetics, with an emphasis on mood, vibrant color palettes, and visually striking compositions suitable for open-world fantasy landscapes.
+  - The size of the image should fit for a phone wallpaper.
 
   ### Plants to be grown:
   {plant_recommendations}
@@ -20,7 +21,7 @@ image_generator_zh: |
 
 example_input_output:
   model:
-    - dall-e-3 or better
+    - gpt-image-1
   input:
     - images:
         - see images in test_images/user1
