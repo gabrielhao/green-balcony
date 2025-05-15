@@ -4,16 +4,16 @@ env_feature_extractor_en: |
     
     - Identify the latitude, longitude and altitude information from the compass image for your analysis in the next step.
     - Extract and analyze the key geographical and environmental features relevant to growing plants.
-
-    Please return a concise and insightful analysis in the following JSON format, and please don't add any other keys:
+ 
+    Return a JSON object with the following fields, and don't add any other keys:
     {
-      "sunlight_exposure": "<Description of sun exposure patterns based on orientation and shadows>",
-      "micro_climate": "<Note variations caused by buildings, trees, or structures that create unique temperature or moisture conditions within the site.>",
-      "hardscape_elements": "<Presence and impact of non-plant structures like walls, pavements, fences, etc.>",
-      "plant_inventory": "<Document existing plants, trees, and shrubs, including their health, size, and location. Decide which to retain, transplant, or remove.>"
-      "environmental_factors": "<Map existing structures such as patios, paths, fences, sheds, utilities (overhead and underground), and any other built features.>",
-      "wind_pattern": "<Prevailing wind directions, obstructions, and intensity patterns>"
-    }
+        "sun_exposure": "<Description of sun exposure patterns based on orientation and shadows>"
+        "micro_climate": "<Note variations caused by buildings, trees, or structures that create unique temperature or moisture conditions within the site.>"
+        "hardscape_elements": "<Presence and impact of non-plant structures like walls, pavements, fences, etc.>"
+        "plant_inventory": "<Document existing plants, trees, and shrubs, including their health, size, and location. Decide which to retain, transplant, or remove.>"
+        "environmental_factors": "<Map existing structures such as patios, paths, fences, sheds, utilities (overhead and underground), and any other built features.>"
+        "wind_pattern": "<Prevailing wind directions, obstructions, and intensity patterns>"
+    }   
     Make sure your analysis is practical and tailored to optimizing plant growth at the specified location.
 
 env_feature_extractor_zh: |
@@ -42,12 +42,11 @@ example_input_output:
       - see images in
         - test_images/user1
     output:
-      - user1:
-        {
-          "sunlight_exposure": "The compass indicates a northwest orientation (301°), suggesting that the location receives moderate afternoon sunlight but limited direct morning sunlight. Shadows from nearby structures may impact light availability further.",
-          "micro_climate": "The presence of nearby buildings and fences likely creates a sheltered micro-climate with reduced wind exposure. However, it might limit temperature fluctuations, providing some warmth but potentially trapping excessive moisture in the vicinity.",
-          "hardscape_elements": "Window ledges, fences, and nearby building walls are key hardscape elements. These may reflect or absorb heat, influencing plant growth conditions. The proximity to the street introduces potential heat and light reflection from paved surfaces.",
-          "plant_inventory": "Indoor plants include spider plants, purple heart, philodendron, and others in pots on the windowsill. Health appears moderate with some yellowing and drooping leaves, possibly due to watering irregularities or insufficient light. Outdoor window boxes house purple heart plants. Existing plants should be assessed for compatibility with available light and micro-climate.",
-          "environmental_factors": "Key environmental factors include proximity to street-facing windows, which may expose plants to noise, pollution, and varying temperatures. Fenced front yards provide moderate isolation but have limited space for additional planting.",
-          "wind_pattern": "The northwest orientation and sheltered indoor setting reduce wind exposure. However, outdoor window boxes may be subject to occasional gusts or turbulent airflow created by nearby structures."
-        }
+      {
+        "sunlight_exposure": "The compass indicates a northwest orientation (301°), suggesting that the location receives moderate afternoon sunlight but limited direct morning sunlight. Shadows from nearby structures may impact light availability further.",
+        "micro_climate": "The presence of nearby buildings and fences likely creates a sheltered micro-climate with reduced wind exposure. However, it might limit temperature fluctuations, providing some warmth but potentially trapping excessive moisture in the vicinity.",
+        "hardscape_elements": "Window ledges, fences, and nearby building walls are key hardscape elements. These may reflect or absorb heat, influencing plant growth conditions. The proximity to the street introduces potential heat and light reflection from paved surfaces.",
+        "plant_inventory": "Indoor plants include spider plants, purple heart, philodendron, and others in pots on the windowsill. Health appears moderate with some yellowing and drooping leaves, possibly due to watering irregularities or insufficient light. Outdoor window boxes house purple heart plants. Existing plants should be assessed for compatibility with available light and micro-climate.",
+        "environmental_factors": "Key environmental factors include proximity to street-facing windows, which may expose plants to noise, pollution, and varying temperatures. Fenced front yards provide moderate isolation but have limited space for additional planting.",
+        "wind_pattern": "The northwest orientation and sheltered indoor setting reduce wind exposure. However, outdoor window boxes may be subject to occasional gusts or turbulent airflow created by nearby structures."
+      }

@@ -5,48 +5,13 @@ import { useRouter } from 'next/navigation';
 import { DeviceFrame } from '@/components/layout';
 import { LoadingAnimation } from '@/components/shared';
 import { useAppContext, STEPS } from '@/context/app-context';
+import { usePhotoUpload } from '@/hooks/usePhotoUpload';
 
-// 模拟API调用 - 在实际应用中，这将是对后端的请求
-// const generateGardenPlan = async () => {
-//   // 模拟API延迟
-//   await new Promise(resolve => setTimeout(resolve, 5000));
-  
-//   // 返回模拟结果
-//   return [
-//     {
-//       id: 'plant1',
-//       name: 'Parsley',
-//       location: 'Right side of planter',
-//       description: 'Tolerates partial shade well, aromatic and versatile in cooking',
-//       image: '/assets/plants/parsley.jpg'
-//     },
-//     {
-//       id: 'plant2',
-//       name: 'Cilantro/Coriander',
-//       location: 'Left side of planter',
-//       description: 'Tolerates partial shade well, aromatic and versatile in cooking',
-//       image: '/assets/plants/cilantro.jpg'
-//     },
-//     {
-//       id: 'plant3',
-//       name: 'Mint',
-//       location: 'Center back of planter',
-//       description: 'Thrives in most conditions, fragrant, great for teas and cocktails',
-//       image: '/assets/plants/mint.jpg'
-//     },
-//     {
-//       id: 'plant4',
-//       name: 'Basil',
-//       location: 'Center front of planter',
-//       description: 'Loves sunshine, perfect companion for tomatoes in cooking',
-//       image: '/assets/plants/basil.jpg'
-//     }
-//   ];
-// };
 
 export default function LoadingPage() {
   const router = useRouter();
-  const { photos, preferences, location, setResults, setGardenImageUrl, setPlantImages } = useAppContext();
+  const { photos, preferences, location, setResults, setGardenImageUrl, setPlantImages, clearPhotos } = useAppContext();
+  const { removePhoto } = usePhotoUpload();
   const apiCalledRef = useRef(false);
   
   // Gardening tips
@@ -132,12 +97,17 @@ export default function LoadingPage() {
         setResults(plant_recommendations);
         setGardenImageUrl(garden_image_url);
         setPlantImages(plant_images);
+
+        //when the API call is successful, delete the photos from the state
+        photos.forEach((photo: { id: string; url: string }) => removePhoto(photo.id, photo.url));
+        clearPhotos(); // clear photos in context
+
+        // Navigate to results page
         router.push('/results');
       } catch (err) {
         console.error('生成计划时出错:', err);
         // 导航回偏好页面
-        router.push('/preferences');
-        
+        router.push('/preferences');   
       }
     };
 

@@ -37,41 +37,17 @@ with location, it retrieves "environment_factors" with tool calling openweatherm
 with compass information, images, it retrieves "wind_pattern".
 with user input, it gets "style_preferences" directly from user input.
 
-The graph has 5 nodes that run in parallel:
-Node 1: Get "sun_exposure", "micro_climate", "hardscape_elements", "plant_iventory"
-Node 2: Get "environment_factors"
-Node 3: Get "wind_pattern"
-Node 4: Get "style_preferences"
-Node 5: Generate final output. Take garden_info and plant_recommendations and create a final output. 
-
 """
 
-# [+] add model
-# [+] add images
-# [+] add langsmith tracing
-# [+] merge nodes
-# [+] add tool binding
-# [+] add location input
-# [+] update prompt
-# [+] debug all
-# [+] move images to the state
-# [+] add content safety
-# [+] finalize the code
-# [+] integrate with the website
 
 def check_compliance(state: GardenState) -> GardenState:
     """
     Check compliance of the generated content.
     """
     print("Checking compliance")
-    
-    system_prompt = """
-    You are a photo compliance inspector. Review the uploaded images and determine if they meet the following criteria:
 
-    - The images primarily show a balcony, a small garden, or an indoor/outdoor space suitable for growing plants.
-
-    Respond only with 'Pass' or 'Fail' — no additional explanation is needed.
-    """
+    # Load the prompt template
+    system_prompt = load_prompt('compliance_checker.yml', 'compliance_checker_en')
 
     garden_image_contents = state["images"]
     
@@ -104,26 +80,9 @@ def analyze_garden_conditions(state: GardenState) -> GardenState:
     Environment_factors and wind_pattern are retrieved from openweathermap api and weatherbit api.
     """
     print("Analyzing garden conditions")
-    # Get garden information from LLM
-    system_prompt = """
-    You are a geography expert specializing in environmental analysis for horticulture.
-    Based on several uploaded images taken from different angles, a photo of a compass, your task is to:
-    
-    - Identify the latitude, longitude and altitude information from the compass image for your analysis in the next step.
-    - Extract and analyze the key geographical and environmental features relevant to growing plants.
- 
-    Return a JSON object with the following fields, and don't add any other keys:
-    {
-        "sun_exposure": "<Description of sun exposure patterns based on orientation and shadows>"
-        "micro_climate": "<Note variations caused by buildings, trees, or structures that create unique temperature or moisture conditions within the site.>"
-        "hardscape_elements": "<Presence and impact of non-plant structures like walls, pavements, fences, etc.>"
-        "plant_inventory": "<Document existing plants, trees, and shrubs, including their health, size, and location. Decide which to retain, transplant, or remove.>"
-        "environmental_factors": "<Map existing structures such as patios, paths, fences, sheds, utilities (overhead and underground), and any other built features.>"
-        "wind_pattern": "<Prevailing wind directions, obstructions, and intensity patterns>"
-    }
-    
-    Make sure your analysis is practical and tailored to optimizing plant growth at the specified location.
-    """
+
+    # Load the prompt template
+    system_prompt = load_prompt('env_feature_extractor.yml', 'env_feature_extractor_en')
     
     garden_image_contents = state["images"]
     
@@ -193,7 +152,7 @@ def analyze_garden_conditions(state: GardenState) -> GardenState:
 
 def generate_final_output(state: GardenState) -> GardenState:
     """
-    Generate final output. Take garden_info and plant_recommendations and create a final output. 
+    Generate final output. Take garden_info and user_preferences and create a final output. 
     Final output should be a structured report with the following sections:
     - Introduction
     - Garden Analysis
@@ -214,9 +173,10 @@ def generate_final_output(state: GardenState) -> GardenState:
     
     # User's preferences
     preferences = state.get('style_preferences', 'Not analyzed')
-    
-    # Create a prompt for the LLM to generate a structured report
-    system_prompt = """
+    print(f"Preferences: {preferences}")
+
+    # Load the prompt template
+    system_prompt = """  
     You are a botany expert. Your task is to recommend suitable plants for someone who wants to create a small garden on their balcony. Please consider the following environmental conditions and preferences:
 
     ### User's preferences:
@@ -227,26 +187,26 @@ def generate_final_output(state: GardenState) -> GardenState:
 
     Based on this context, please generate a list of at least 3 suitable plants (can be more than 3) that would thrive in these conditions following the JSON structure below:
     {
-      "recommended_plants": [
-        {
-          "id": "0",
-          "name": "<plantA>",
-          "description": "<A description of plantA.>",
-          "growingConditions": "<Growing conditions of plantA.>",
-          "plantingTips": "<Planting tips of plantA.>",
-          "care_tips": "<Care tips of plantA.>",
-          "harvestingTips": "<Harvesting tips of plantA.>"
+      "plant_recommendations": [
+          {
+            "id": "0",
+            "name": "<plantA>",
+            "description": "<A description of plantA.>",
+            "growingConditions": "<Growing conditions of plantA.>",
+            "plantingTips": "<Planting tips of plantA.>",
+            "care_tips": "<Care tips of plantA.>",
+            "harvestingTips": "<Harvesting tips of plantA.>"
+          },
+         {
+           "id": "1",
+           "name": "<plantB>",
+           "description": "<A description of plantB.>",
+           "growingConditions": "<Growing conditions of plantB.>",
+           "plantingTips": "<Planting tips of plantB.>",
+           "care_tips": "<Care tips of plantB.>",
+           "harvestingTips": "<Harvesting tips of plantB.>"
         },
-        {
-          "id": "1",
-          "name": "<plantB>",
-          "description": "<A description of plantB.>",
-          "growingConditions": "<Growing conditions of plantB.>",
-          "plantingTips": "<Planting tips of plantB.>",
-          "care_tips": "<Care tips of plantB.>",
-          "harvestingTips": "<Harvesting tips of plantB.>"
-        },
-        {
+       {
           "id": "2",
           "name": "<plantC>",
           "description": "<A description of plantC.>",
@@ -256,9 +216,10 @@ def generate_final_output(state: GardenState) -> GardenState:
           "harvestingTips": "<Harvesting tips of plantC.>"
         },
         ...
-      ]
+       ]
     }
-    The JSON should start with key "plant_recommendations" and end with key "}"
+    
+    The JSON should start with key "plant_recommendations". 
     """
     
     messages = [
@@ -280,13 +241,16 @@ def generate_final_output(state: GardenState) -> GardenState:
     response = llm.invoke(messages)
     final_report = response.content
     
-    #print(f"Final report: {final_report}")
+    print(f"Final report: {final_report}")
     
     if "plant_recommendations" in final_report:
         state["plant_recommendations"] = json.loads(final_report)["plant_recommendations"]
         print(f"Plant Recommendations: {state['plant_recommendations']}")
     else:
+        # if no plant recommendations, set an empty list
         state["plant_recommendations"] = "None, no information"
+        
+    print(f"Plant Recommendations final: {state['plant_recommendations']}")
     
     # Store the final report in the state
     state["final_output"] = final_report
@@ -311,6 +275,8 @@ def create_garden_image(state: GardenState) -> GardenState:
     The image is created by LLM. For debugging, the image is shown.
     """
     
+    print("Generating garden image with GPT")
+    
     load_dotenv()    
     
     # Get garden information from state
@@ -322,7 +288,7 @@ def create_garden_image(state: GardenState) -> GardenState:
         return state
     
     # Wrap loaded Azure images as file-like objects
-    print("Wrapping loaded Azure images as file-like objects")
+    #print("Wrapping loaded Azure images as file-like objects")
     image_files = []
     for idx, img_bytes in enumerate(garden_image_contents):
         bio = BytesIO(base64.b64decode(img_bytes))
@@ -334,9 +300,9 @@ def create_garden_image(state: GardenState) -> GardenState:
         plant_recommendations=json.dumps(plant_recommendations, indent=2)
     )
 
-    print("Generating image with GPT")
+    
     try:
-        response = generate_image(system_prompt, image_files)
+        response = generate_image(system_prompt, image_files, size="1024x1536", quality="medium")
         if response is None:
             print("Error: Failed to generate image with GPT")
             return state
@@ -380,7 +346,7 @@ def create_plant_images(state: GardenState) -> GardenState:
     for plant in plant_recommendations:
         print(f"Creating image for {plant['name']}")
         # create plant image
-        plant_image_url = generate_image(system_prompt.format(plant_name=plant['name']), image_files=None, image_name=plant['name'])
+        plant_image_url = generate_image(system_prompt.format(plant_name=plant['name']), image_files=None, image_name=plant['name'], size="1024x1024", quality="low")
         state["plant_images"].append({
             "name": plant['name'],
             "image_url": plant_image_url
@@ -388,7 +354,7 @@ def create_plant_images(state: GardenState) -> GardenState:
     
     return state
 
-def generate_image(prompt: str, image_files: Optional[List[BytesIO]] = None, image_name: str = "garden_image") -> Optional[str]:
+def generate_image(prompt: str, image_files: Optional[List[BytesIO]] = None, image_name: str = "garden_image", size: str = "1024x1024", quality: str = "medium") -> Optional[str]:
     """
     Generate or edit an image using GPT.
     
@@ -407,13 +373,15 @@ def generate_image(prompt: str, image_files: Optional[List[BytesIO]] = None, ima
             response = client.images.edit(
                 model="gpt-image-1",
                 image=image_files,
-                prompt=prompt
+                prompt=prompt             
             )
         else:
             # Generate new image
             response = client.images.generate(
                 model="gpt-image-1",
-                prompt=prompt
+                prompt=prompt,
+                size=size,
+                quality=quality
             )
         
         image_loader = AzureImageLoader(

@@ -6,7 +6,7 @@ interface UsePhotoUploadReturn {
   photos: PhotoData[];
   uploadPhoto: (file: File) => Promise<PhotoData>;
   takePhoto: () => Promise<PhotoData | null>;
-  removePhoto: (id: string) => void;
+  removeCloudPhoto: (id: string, url: string) => Promise<void>;
   isLoading: boolean;
   error: string | null;
 }
@@ -36,13 +36,14 @@ export function usePhotoUpload(): UsePhotoUploadReturn {
       const preview = await createImagePreview(file);
       
       // 上传到Azure Blob Storage
-      const uploadedUrl = await uploadToAzureBlob(file);
-      
+      const uploadedName = await uploadToAzureBlob(file);
+      const uploadedUrl = `${process.env.NEXT_PUBLIC_AZURE_STORAGE_ACCOUNT_URL}images/${uploadedName}?${process.env.NEXT_PUBLIC_AZURE_STORAGE_SAS_TOKEN}`;
       // Debug information
-      console.log('Uploaded image URL:', uploadedUrl);
+      console.log('Uploaded image name:', uploadedName);
       
       const newPhoto: PhotoData = {
         id: Date.now().toString(),
+        name: uploadedName,
         url: uploadedUrl,
         preview
       };
@@ -87,8 +88,50 @@ export function usePhotoUpload(): UsePhotoUploadReturn {
   };
 
   // 删除照片
-  const removePhoto = (id: string): void => {
-    setPhotos(prevPhotos => prevPhotos.filter(photo => photo.id !== id));
+  const removeCloudPhoto = async (id: string, name: string): Promise<void> => {
+    // input checkt
+    if (!id || !name) {
+      throw new Error('Invalid input for remove cloud photo, id: ' + id + ', name: ' + name);
+    }
+
+    try {
+      // Get SAS token from environment variables
+      const sasToken = process.env.NEXT_PUBLIC_AZURE_STORAGE_SAS_TOKEN;
+      if (!sasToken) {
+        throw new Error('Azure Storage SAS token is not configured');
+      }
+
+      // Define the Storage Account URL
+      const storageAccountUrl = process.env.NEXT_PUBLIC_AZURE_STORAGE_ACCOUNT_URL;
+      if (!storageAccountUrl) {
+        throw new Error('Azure Storage Account URL is not configured');
+      }
+
+      // Extract the blob name from the URL
+      const blobName = name;
+      if (!blobName) {
+        throw new Error('Invalid blob name');
+      }
+
+      // Create a BlobServiceClient
+      const blobServiceClient = new BlobServiceClient(`${storageAccountUrl}?${sasToken}`);
+
+      // Get a reference to the container
+      const containerClient = blobServiceClient.getContainerClient("images");
+
+      // Get a block blob client
+      const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+
+      // Delete the blob
+      await blockBlobClient.delete();
+      console.log(`Blob ${blobName} deleted successfully.`);
+
+      // Remove the photo from the local state
+      setPhotos(prevPhotos => prevPhotos.filter(photo => photo.id !== id));
+    } catch (error) {
+      console.error("Error deleting photo:", error instanceof Error ? error.message : 'Unknown error');
+      throw new Error('Failed to delete photo from Azure Blob Storage');
+    }
   };
 
   // 创建图片预览
@@ -141,8 +184,8 @@ export function usePhotoUpload(): UsePhotoUploadReturn {
 
       console.log(`File uploaded successfully. Request ID: ${uploadBlobResponse.requestId}`);
 
-      // Return the file URL
-      return blockBlobClient.url;
+      // Return the blob name
+      return blockBlobClient.name;
     } catch (error) {
       console.error("Error uploading file:", error instanceof Error ? error.message : 'Unknown error');
       throw new Error('Failed to upload file to Azure Blob Storage');
@@ -157,6 +200,7 @@ export function usePhotoUpload(): UsePhotoUploadReturn {
     // 返回模拟照片数据
     return {
       id: Date.now().toString(),
+      name: 'sample-balcony-1.jpg',
       url: '/assets/sample-balcony-1.jpg',
       preview: '/assets/sample-balcony-1.jpg'
     };
@@ -166,8 +210,8 @@ export function usePhotoUpload(): UsePhotoUploadReturn {
     photos,
     uploadPhoto,
     takePhoto,
-    removePhoto,
+    removeCloudPhoto,
     isLoading,
     error
   };
-} 
+}

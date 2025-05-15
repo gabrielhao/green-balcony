@@ -13,6 +13,7 @@ def load_prompt(prompt_file: str, prompt_key: str) -> str:
     Returns:
         str: The prompt text
     """
+    print(f"Loading prompt from {prompt_file} with key {prompt_key}")
     # Get the absolute path to the prompts directory
     prompts_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), 'prompts')
     prompt_path = os.path.join(prompts_dir, prompt_file)

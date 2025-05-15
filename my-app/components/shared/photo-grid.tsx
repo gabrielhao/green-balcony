@@ -5,6 +5,7 @@ import { AddPhotoButton } from './add-photo-button';
 
 interface Photo {
   id: string;
+  name: string;
   url: string;
   alt?: string;
 }

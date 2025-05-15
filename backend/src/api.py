@@ -102,7 +102,7 @@ async def create_garden_plan(request: GardenPlanRequest):
         graph = build_garden_graph()
         
         # Format user preferences for the garden state
-        style_preferences = f"preferred grow type: {request.user_preferences.growType or ''} {request.user_preferences.subType or ''}, preferred cycle type: {request.user_preferences.cycleType or ''}, preferred winter type: {request.user_preferences.winterType or ''}".strip()
+        style_preferences = f"preferred grow type: {request.user_preferences.growType or 'none'} {request.user_preferences.subType or 'none'}, preferred cycle type: {request.user_preferences.cycleType or 'none'}, preferred winter type: {request.user_preferences.winterType or 'none'}".strip()
 
         # Initialize the state
         initial_state = GardenState(
