@@ -9,8 +9,8 @@ import { useAppContext, STEPS, PhotoData } from '@/context/app-context';
 
 export default function PhotosPage() {
   const router = useRouter();
-  const { photos, uploadPhoto, takePhoto, removePhoto, isLoading, error } = usePhotoUpload();
-  const { addPhoto, removePhoto: removeGlobalPhoto, goToStep } = useAppContext();
+  const { photos, uploadPhoto, takePhoto, removeCloudPhoto, isLoading, error } = usePhotoUpload();
+  const { addPhoto, removePhoto, goToStep } = useAppContext();
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -22,7 +22,7 @@ export default function PhotosPage() {
   // Handle photo deletion
   const handleDelete = (id: string) => {
     removePhoto(id);
-    removeGlobalPhoto(id);
+    removeCloudPhoto(id, photos.find(photo => photo.id === id)?.name || '');
   };
   
   // Handle file input click
@@ -93,6 +93,7 @@ export default function PhotosPage() {
   // Format photos for PhotoGrid component
   const formattedPhotos = photos.map(photo => ({
     id: photo.id,
+    name: photo.name,
     url: photo.url || photo.preview,
     alt: 'Balcony photo'
   }));

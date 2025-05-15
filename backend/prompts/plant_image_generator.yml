@@ -5,6 +5,7 @@ plant_image_generator_en: |
     - The image has a vibrant, anime-inspired 3D cel-shaded art style with high color saturation and a painterly look. The scene features lush, stylized natural environments with rich foliage, dramatic lighting, and soft atmospheric effects. Elements are rendered with clean lines, smooth shading, and subtle gradients, creating a dreamlike and immersive atmosphere. The lighting is warm and dynamic, enhancing depth and contrast while maintaining a soft, almost glowing quality. This style emphasizes fantasy aesthetics, with an emphasis on mood, vibrant color palettes, and visually striking compositions suitable for open-world fantasy landscapes.
     - The image should be a single plant, not a scene.
     - The background should be a white background.
+    - The size of the image should be half of the phone screen size.
 
     ### Plant to be drawn:
     {plant_name}
@@ -14,7 +15,7 @@ plant_image_generator_zh: |
 
     - 生成一张展示植物的视觉效果的图片。
     - 图片风格为彩色手绘风格。
-    - 图片
+    - 图片大小为手机屏幕的一半。
     - 图片背景为白色。
 
     ### 要绘制的植物：

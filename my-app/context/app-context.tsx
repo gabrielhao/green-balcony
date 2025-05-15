@@ -12,6 +12,7 @@ export interface LocationData {
 // 定义照片数据类型
 export interface PhotoData {
   id: string;
+  name: string;
   url: string;
   preview: string;
 }
@@ -78,10 +79,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [location, setLocationState] = useState<LocationData>({});
   const [photos, setPhotos] = useState<PhotoData[]>([]);
   const [preferences, setPreferencesState] = useState<PlantPreferences>({
-    growType: null,
-    subType: null,
-    cycleType: null,
-    winterType: null
+    growType: "",
+    subType: "",
+    cycleType: "",
+    winterType: ""
   });
   const [results, setResultsState] = useState<PlantResult[]>([]);
   const [gardenImageUrl, setGardenImageUrlState] = useState<string>('');
