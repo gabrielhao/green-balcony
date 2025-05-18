@@ -127,9 +127,9 @@ def analyze_garden_conditions(state: GardenState) -> GardenState:
         state["hardscape_elements"] = "None, no inpput information"
         
     if "plant_inventory" in response_content:
-        state["plant_iventory"] = extract_value(response_content, "plant_inventory")
+        state["plant_inventory"] = extract_value(response_content, "plant_inventory")
     else:
-        state["plant_iventory"] = "None currently, new garden"
+        state["plant_inventory"] = "None currently, new garden"
     
     if "environment_factors" in response_content:
         state["environment_factors"] = extract_value(response_content, "environment_factors")
@@ -421,45 +421,18 @@ def extract_value(text: str, key: str) -> Optional[str]:
     Raises:
         ValueError: If the text is empty or invalid
     """
-
     if not text or not isinstance(text, str):
         raise ValueError("Text must be a non-empty string")
         
     try:
-        # Try to parse the text as JSON
-        import json
-        # Remove markdown code block if present
-        text = text.strip('`').strip()
-        if text.startswith('json'):
-            text = text[4:].strip()
         data = json.loads(text)
-        
-        # Get the value for the key
-        value = data.get(key)
-        if value is None:
-            logger.warning(f"No value found for key '{key}' in JSON")
-            return None
-            
-        # Convert lists to strings
-        if isinstance(value, list):
-            return ', '.join(str(item) for item in value)
-            
-        return str(value)
+        return data.get(key)
     except json.JSONDecodeError:
-        # If not valid JSON, try regex as fallback
-        try:
-            pattern = rf"{key}:\s*([^\n]+)"
-            match = re.search(pattern, text)
-            if not match:
-                logger.warning(f"No match found for key '{key}' in text")
-                return None
-            return match.group(1).strip()
-        except Exception as e:
-            logger.error(f"Error extracting value for key '{key}': {str(e)}")
-            return None
-    except Exception as e:
-        logger.error(f"Error extracting value for key '{key}': {str(e)}")
-        return None
+        # Try regex extraction if JSON parsing fails
+        import re
+        pattern = f'"{key}"\s*:\s*"([^"]*)"'
+        match = re.search(pattern, text)
+        return match.group(1) if match else None
 
 def upload_image(image_content: str, container_name: str, blob_name: str) -> str:
     """Upload an image to Azure Blob Storage and return its URL."""

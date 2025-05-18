@@ -1,0 +1,9 @@
+test_prompt_en: |
+  You are a test bot. Your task is to analyze the following input:
+  {input_text}
+  
+  Please provide a response in the following format:
+  {
+    "analysis": "<your analysis>",
+    "recommendations": ["<recommendation1>", "<recommendation2>"]
+  } 
