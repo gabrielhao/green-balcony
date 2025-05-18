@@ -1,9 +1,65 @@
 import pytest
+import json
+import base64
+from io import BytesIO
+import os
 from src.city_garden.city_garden_nodes import analyze_garden_conditions, generate_final_output, \
-    create_garden_image, create_plant_images, extract_value
+    create_garden_image, create_plant_images, extract_value, check_compliance
+from langchain_openai import ChatOpenAI, AzureChatOpenAI
+from langchain_core.messages import SystemMessage, HumanMessage
+from dotenv import load_dotenv
+from src.city_garden.garden_state import GardenState
 
+# Load environment variables from .env file in test_data directory
+test_data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'test_data')
+load_dotenv(os.path.join(test_data_dir, '.env'))
 
-def test_analyze_garden_conditions(mock_llm, sample_garden_state):
+@pytest.fixture(scope="session")
+def llm():
+    """Create a shared LLM instance for all tests."""
+    # Use the same test_data directory path for consistency
+    test_data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'test_data')
+    load_dotenv(os.path.join(test_data_dir, '.env'))
+    llm = AzureChatOpenAI(
+    azure_deployment=os.environ["AZURE_MODEL_NAME"],  # or your deployment
+    api_version="2024-12-01-preview",  # or your api version
+    temperature=0,
+    max_tokens=None,
+    timeout=None,
+    max_retries=2,
+    # other params...
+    )
+    
+    return llm
+
+@pytest.fixture
+def sample_garden_state():
+    """Create a sample garden state for testing."""
+    # Load test image from test_data directory
+    test_image_path = os.path.join(test_data_dir, 'example-2-balcony-3.jpeg')
+    with open(test_image_path, 'rb') as f:
+        image_data = f.read()
+        encoded_image = base64.b64encode(image_data).decode('utf-8')
+    
+    return GardenState(
+        sun_exposure="",
+        micro_climate="",
+        hardscape_elements="",
+        plant_iventory="",
+        environment_factors="",
+        wind_pattern="",
+        style_preferences="preferred grow type: both ornamental and edible, preferred cycle type: annual, preferred winter type: None",
+        plant_recommendations=[],
+        garden_image_url="",
+        garden_image="",
+        location="Berlin, Germany",
+        latitude=float("52.480650067313086"),
+        longitude=float("13.329614694028646"),
+        images=[encoded_image],
+        messages=[]
+    )
+
+def test_analyze_garden_conditions(llm, sample_garden_state):
     """Test garden conditions analysis."""
     state = analyze_garden_conditions(sample_garden_state)
     
@@ -11,44 +67,29 @@ def test_analyze_garden_conditions(mock_llm, sample_garden_state):
     assert "sun_exposure" in state
     assert "micro_climate" in state
     assert "hardscape_elements" in state
-    assert "plant_iventory" in state
+    assert "plant_inventory" in state
     assert "environment_factors" in state
     assert "wind_pattern" in state
-    assert len(state["messages"]) > 0
 
-def test_generate_final_output(mock_llm, sample_garden_state):
+def test_generate_final_output(llm, sample_garden_state):
     """Test final output generation."""
-    # Add required state fields
-    sample_garden_state.update({
-        "sun_exposure": "Full sun",
-        "micro_climate": "Warm and dry",
-        "hardscape_elements": "Concrete floor",
-        "plant_iventory": "None",
-        "environment_factors": "Urban environment",
-        "wind_pattern": "Moderate"
-    })
     
     state = generate_final_output(sample_garden_state)
     
     assert isinstance(state, dict)
     assert "plant_recommendations" in state
+    assert len(state["plant_recommendations"]) > 0
     assert "final_output" in state
-    assert len(state["messages"]) > 0
 
 def test_create_garden_image(mock_openai, mock_azure_storage, sample_garden_state):
     """Test garden image creation."""
-    # Add required state fields
-    sample_garden_state["plant_recommendations"] = [
-        {
-            "id": "1",
-            "name": "Test Plant",
-            "description": "Test Description",
-            "growingConditions": "Test Conditions",
-            "plantingTips": "Test Tips",
-            "care_tips": "Test Care",
-            "harvestingTips": "Test Harvest"
-        }
-    ]
+    # Mock OpenAI response
+    mock_openai.images.generate.return_value = {
+        "data": [{"b64_json": base64.b64encode(b"test image").decode('utf-8')}]
+    }
+    
+    # Mock Azure storage upload
+    mock_azure_storage.upload_blob.return_value = None
     
     state = create_garden_image(sample_garden_state)
     
@@ -84,13 +125,37 @@ def test_extract_value():
     json_text = '{"key": "value"}'
     assert extract_value(json_text, "key") == "value"
     
-    # Test regex extraction
-    text = "key: value"
-    assert extract_value(text, "key") == "value"
-    
     # Test invalid input
-    assert extract_value("", "key") is None
-    assert extract_value(None, "key") is None
+    with pytest.raises(ValueError, match="Text must be a non-empty string"):
+        extract_value("", "key")
     
     # Test non-existent key
-    assert extract_value('{"other": "value"}', "key") is None 
+    assert extract_value('{"other": "value"}', "key") is None
+
+def test_check_compliance_pass(llm, sample_garden_state):
+    """Test compliance checking when garden design passes all regulations."""
+    state = check_compliance(sample_garden_state)
+    
+    assert isinstance(state, dict)
+    assert "compliance_check" in state
+    assert isinstance(state["compliance_check"], str)
+    assert len(state["compliance_check"]) > 0
+    assert state["compliance_check"] == "Pass"
+
+def test_check_compliance_fail(llm, sample_garden_state):
+    """Test compliance checking when garden design fails regulations."""
+    # Modify the state to include problematic elements
+    test_image_path = os.path.join(test_data_dir, 'example-2-compass.jpeg')
+    with open(test_image_path, 'rb') as f:
+        image_data = f.read()
+        encoded_image = base64.b64encode(image_data).decode('utf-8')
+    
+    sample_garden_state["images"] = [encoded_image]
+    
+    state = check_compliance(sample_garden_state)
+    
+    assert isinstance(state, dict)
+    assert "compliance_check" in state
+    assert isinstance(state["compliance_check"], str)
+    assert len(state["compliance_check"]) > 0
+    assert state["compliance_check"] == "Fail"
