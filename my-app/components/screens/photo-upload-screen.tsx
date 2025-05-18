@@ -7,12 +7,19 @@ import { ActionButton } from "@/components/shared/action-button";
 import { UploadService } from '@/lib/services/upload-service';
 import { toast, Toaster } from 'react-hot-toast';
 
+interface Photo {
+  id: string;
+  url: string;
+  name: string;
+  uploading?: boolean;
+}
+
 interface PhotoUploadScreenProps {
   onBack: () => void;
   onContinue: () => void;
   currentStep: number;
   totalSteps: number;
-  photos: Array<{ id: string; url: string; uploading?: boolean }>;
+  photos: Photo[];
   onAddPhoto: (file: File) => void | Promise<void>;
   onEditPhoto: (id: string, file: File) => void | Promise<void>;
   onDeletePhoto: (id: string) => void;
@@ -67,20 +74,27 @@ export function PhotoUploadScreen({
         <input
           type="file"
           accept="image/*"
-          onChange={handleFileChange}
-          className="hidden"
           id="photo-upload"
+          data-testid="photo-upload"
+          className="hidden"
+          onChange={handleFileChange}
           disabled={isUploading}
         />
         
         <PhotoGrid
-          photos={photos}
+          photos={photos.map(photo => ({
+            ...photo,
+            name: photo.name || photo.url.split('/').pop() || 'photo'
+          }))}
           onAdd={() => document.getElementById('photo-upload')?.click()}
           onEdit={(id) => {
             const input = document.createElement('input');
             input.type = 'file';
             input.accept = 'image/*';
-            input.onchange = (e) => handleEditFileChange(id, e as React.ChangeEvent<HTMLInputElement>);
+            input.onchange = (e) => {
+              const event = e as unknown as React.ChangeEvent<HTMLInputElement>;
+              handleEditFileChange(id, event);
+            };
             input.click();
           }}
           onDelete={onDeletePhoto}
@@ -89,7 +103,6 @@ export function PhotoUploadScreen({
         <ActionButton 
           onClick={onContinue}
           className="w-full mt-auto"
-          disabled={isUploading}
         >
           <div className="flex items-center justify-center gap-2">
             {isUploading ? (
