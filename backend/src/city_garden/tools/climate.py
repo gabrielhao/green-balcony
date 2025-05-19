@@ -138,7 +138,7 @@ def get_monthly_average_temperature(latitude: float, longitude: float) -> pd.Dat
         pd.DataFrame: The monthly average temperature of 2024 for the location.
     """
     _validate_coordinates(latitude, longitude)
-    logger.info(f"Getting monthly average temperature for {latitude}, {longitude}")
+    logger.info(f"TOOL: Getting monthly average temperature for {latitude}, {longitude}")
     return _fetch_weather_data(latitude, longitude, "temperature_2m_mean")
 
 @tool
@@ -166,7 +166,7 @@ def get_monthly_precipitation(latitude: float, longitude: float) -> pd.DataFrame
         pd.DataFrame: The monthly precipitation of 2024 for the location.
     """
     _validate_coordinates(latitude, longitude)
-    logger.info(f"Getting monthly precipitation for {latitude}, {longitude}")
+    logger.info(f"TOOL: Getting monthly precipitation for {latitude}, {longitude}")
     return _fetch_weather_data(latitude, longitude, "precipitation_sum")
 
 class WeatherDataFetcher:

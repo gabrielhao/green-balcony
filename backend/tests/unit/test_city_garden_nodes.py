@@ -9,7 +9,7 @@ from langchain_openai import ChatOpenAI, AzureChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
 from dotenv import load_dotenv
 from src.city_garden.garden_state import GardenState
-
+from src.city_garden.tools.climate import get_monthly_average_temperature, get_monthly_precipitation, get_wind_pattern
 # Load environment variables from .env file in test_data directory
 test_data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'test_data')
 load_dotenv(os.path.join(test_data_dir, '.env'))
@@ -29,6 +29,9 @@ def llm():
     max_retries=2,
     # other params...
     )
+    
+    tools = [get_monthly_average_temperature, get_monthly_precipitation, get_wind_pattern]
+    llm.bind_tools(tools, parallel_tool_calls=False)
     
     return llm
 

@@ -12,7 +12,7 @@ env_feature_extractor_en: |
         "hardscape_elements": "<Presence and impact of non-plant structures like walls, pavements, fences, etc.>"
         "plant_inventory": "<Document existing plants, trees, and shrubs, including their health, size, and location. Decide which to retain, transplant, or remove.>"
         "environmental_factors": "<Map existing structures such as patios, paths, fences, sheds, utilities (overhead and underground), and any other built features.>"
-        "wind_pattern": "<Prevailing wind directions, obstructions, and intensity patterns>"
+        "wind_pattern": "<Prevailing wind directions, obstructions, and wind speed patterns of the location>"
     }   
     Make sure your analysis is practical and tailored to optimizing plant growth at the specified location.
 
