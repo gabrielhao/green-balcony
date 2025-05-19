@@ -109,7 +109,7 @@ async def create_garden_plan(request: GardenPlanRequest):
             sun_exposure="",
             micro_climate="",
             hardscape_elements="",
-            plant_iventory="",
+            plant_inventory="",
             environment_factors="",
             wind_pattern="",
             style_preferences=style_preferences,
