@@ -45,7 +45,7 @@ def sample_garden_state():
         sun_exposure="",
         micro_climate="",
         hardscape_elements="",
-        plant_iventory="",
+        plant_inventory="",
         environment_factors="",
         wind_pattern="",
         style_preferences="preferred grow type: both ornamental and edible, preferred cycle type: annual, preferred winter type: None",
@@ -74,11 +74,37 @@ def test_analyze_garden_conditions(llm, sample_garden_state):
 def test_generate_final_output(llm, sample_garden_state):
     """Test final output generation."""
     
+    sample_garden_state["sun_exposure"] = "The area receives direct sunlight, as evidenced by the sharp shadows cast by the railing and plants. The orientation suggests significant sun exposure during the day, likely favoring plants that thrive in full sun conditions."
+    sample_garden_state["micro_climate"] = "The balcony is enclosed by glass and metal railings, creating a micro-climate with potentially higher temperatures and reduced wind flow compared to open areas. This setup may retain heat and moisture, benefiting tropical or heat-tolerant plants."
+    sample_garden_state["hardscape_elements"] = "The balcony features tiled flooring, glass panels, and metal railings. These elements reflect sunlight and heat, which could influence the temperature and moisture levels for plants. The hardscape limits soil planting but supports container gardening."
+    sample_garden_state["environment_factors"] = "The balcony is surrounded by urban structures, including nearby buildings and construction sites. These features may contribute to dust accumulation and reduced air quality, which could impact plant health. The enclosed space limits exposure to external utilities or underground features."
+    sample_garden_state["wind_pattern"] = "The enclosed balcony design reduces wind intensity, creating a sheltered environment. However, the presence of nearby buildings may cause occasional gusts or turbulence. Plants should be selected for low wind tolerance."
+    
     state = generate_final_output(sample_garden_state)
     
     assert isinstance(state, dict)
     assert "plant_recommendations" in state
     assert len(state["plant_recommendations"]) > 0
+    assert "final_output" in state
+    
+def test_generate_final_output_with_plants_inventory(llm, sample_garden_state):
+    """Test final output generation with plants inventory."""
+    
+    sample_garden_state["plant_inventory"] = "Existing plants include succulents and a flowering shrub (possibly a rose). The succulents appear healthy and well-suited to the environment, while the shrub shows signs of growth but may require additional care. Retain the succulents and monitor the shrub for health improvements."
+    sample_garden_state["sun_exposure"] = "The area receives direct sunlight, as evidenced by the sharp shadows cast by the railing and plants. The orientation suggests significant sun exposure during the day, likely favoring plants that thrive in full sun conditions."
+    sample_garden_state["micro_climate"] = "The balcony is enclosed by glass and metal railings, creating a micro-climate with potentially higher temperatures and reduced wind flow compared to open areas. This setup may retain heat and moisture, benefiting tropical or heat-tolerant plants."
+    sample_garden_state["hardscape_elements"] = "The balcony features tiled flooring, glass panels, and metal railings. These elements reflect sunlight and heat, which could influence the temperature and moisture levels for plants. The hardscape limits soil planting but supports container gardening."
+    sample_garden_state["environment_factors"] = "The balcony is surrounded by urban structures, including nearby buildings and construction sites. These features may contribute to dust accumulation and reduced air quality, which could impact plant health. The enclosed space limits exposure to external utilities or underground features."
+    sample_garden_state["wind_pattern"] = "The enclosed balcony design reduces wind intensity, creating a sheltered environment. However, the presence of nearby buildings may cause occasional gusts or turbulence. Plants should be selected for low wind tolerance."
+    
+    state = generate_final_output(sample_garden_state)
+    
+    print("plant_inventory: ", state["plant_inventory"])
+    
+    assert isinstance(state, dict)
+    assert "plant_recommendations" in state
+    assert len(state["plant_recommendations"]) > 0
+    print("plant_recommendations: ", state["plant_recommendations"])
     assert "final_output" in state
 
 def test_create_garden_image(mock_openai, mock_azure_storage, sample_garden_state):

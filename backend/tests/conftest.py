@@ -33,7 +33,7 @@ def sample_garden_state():
         "sun_exposure": None,
         "micro_climate": None,
         "hardscape_elements": None,
-        "plant_iventory": None,
+        "plant_inventory": None,
         "environment_factors": None,
         "wind_pattern": None
     }

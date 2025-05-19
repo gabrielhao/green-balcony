@@ -5,7 +5,7 @@ env_feature_extractor_en: |
     - Identify the latitude, longitude and altitude information from the compass image for your analysis in the next step.
     - Extract and analyze the key geographical and environmental features relevant to growing plants.
  
-    Return a JSON object with the following fields, and don't add any other keys:
+    Only return a JSON object with the following fields, and don't add any other keys, and don't add any other text other than the JSON object:
     {
         "sun_exposure": "<Description of sun exposure patterns based on orientation and shadows>"
         "micro_climate": "<Note variations caused by buildings, trees, or structures that create unique temperature or moisture conditions within the site.>"
