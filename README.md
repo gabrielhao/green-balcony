@@ -126,6 +126,60 @@ The application will be available at `http://localhost:3000`
 - `LANGSMITH_API_KEY`: LangSmith API key
 - `LANGSMITH_PROJECT`: LangSmith project name
 
+## Testing
+
+### Backend Tests
+The backend uses pytest for testing. To run the tests:
+
+1. Make sure you're in the backend directory and your virtual environment is activated:
+```bash
+cd backend
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+2. Install test dependencies:
+```bash
+pip install pytest pytest-cov
+```
+
+3. Run the tests:
+```bash
+# Run all tests
+pytest
+
+# Run tests with coverage report
+pytest --cov=src tests/
+
+# Run specific test file
+pytest tests/unit/test_city_garden_nodes.py
+
+# Run specific test case and allows print() statements in your test code to be shown in the terminal.
+pytest tests/unit/test_city_garden_nodes.py::test_analyze_garden_conditions -s
+```
+
+### Frontend Tests
+The frontend uses Jest and React Testing Library for testing. To run the tests:
+
+1. Navigate to the frontend directory:
+```bash
+cd my-app
+```
+
+2. Run the tests:
+```bash
+# Run all tests
+pnpm test --verbose
+
+# Run tests in watch mode
+pnpm test:watch
+
+# Run tests with coverage
+pnpm test:coverage
+```
+
+### Running Tests in CI/CD
+Tests are automatically run in the CI/CD pipeline. You can check the test results in the GitHub Actions workflow.
+
 ## Support
 
 For support, please open an issue in the repository or contact the development team.
