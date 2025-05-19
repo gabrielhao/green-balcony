@@ -32,7 +32,7 @@ load_dotenv()
 
 """ 
 City Garden Graph is a state graph that defines the flow of the city garden project. 
-with time, images, it retrieves "sun_exposure", "micro_climate", "hardscape_elements", "plant_iventory".
+with time, images, it retrieves "sun_exposure", "micro_climate", "hardscape_elements", "plant_inventory".
 with location, it retrieves "environment_factors" with tool calling openweathermap api.
 with compass information, images, it retrieves "wind_pattern".
 with user input, it gets "style_preferences" directly from user input.
@@ -77,7 +77,7 @@ def analyze_garden_conditions(state: GardenState) -> GardenState:
     """
     Analyze garden conditions based on garden images, compass information, location information.
     Sets sun_exposure, micro_climate, hardscape_elements, and plant_inventory, environment_factors, wind_pattern.
-    Environment_factors and wind_pattern are retrieved from openweathermap api and weatherbit api.
+    Environment_factors and wind_pattern could be retrieved from provided tools, openweathermap api and weatherbit api.
     """
     print("Analyzing garden conditions")
 
@@ -166,10 +166,12 @@ def generate_final_output(state: GardenState) -> GardenState:
     Sun exposure: {state.get('sun_exposure', 'Not analyzed')}
     Micro climate: {state.get('micro_climate', 'Not analyzed')}
     Hardscape elements: {state.get('hardscape_elements', 'Not analyzed')}
-    Plant inventory: {state.get('plant_iventory', 'Not analyzed')}
+    Plant inventory: {state.get('plant_inventory', 'Not analyzed')}
     Environment factors: {state.get('environment_factors', 'Not analyzed')}
     Wind pattern: {state.get('wind_pattern', 'Not analyzed')}
     """
+    
+    print(f"Garden info: {garden_info}")
     
     # User's preferences
     preferences = state.get('style_preferences', 'Not analyzed')
@@ -177,7 +179,7 @@ def generate_final_output(state: GardenState) -> GardenState:
 
     # Load the prompt template
     system_prompt = """  
-    You are a botany expert. Your task is to recommend suitable plants for someone who wants to create a small garden on their balcony. Please consider the following environmental conditions and preferences:
+    You are a botany expert. Your task is to recommend suitable plants for someone who wants to create a small garden on their balcony, besdes existing plants in the garden, if any. Please consider the following environmental conditions and preferences:
 
     ### User's preferences:
     {preferences}
@@ -185,12 +187,14 @@ def generate_final_output(state: GardenState) -> GardenState:
     ### Environment information:
     {garden_info}
 
-    Based on this context, please generate a list of at least 3 suitable plants (can be more than 3) that would thrive in these conditions following the JSON structure below:
+    First, identify any existing plants in the balcony and existing plants are in the environment information. If no existing plants are found, skip this step. If any existing plants are found, they should be on the first place in the list. 
+    
+    Then, based on this context, please generate a list of at least 3 suitable plants (can be more than 3, as long as they fit the balcony space) that would thrive in these conditions following the JSON structure below:
     {
       "plant_recommendations": [
           {
             "id": "0",
-            "name": "<plantA>",
+            "name": "botanical (scientific) name of the plantA>",
             "description": "<A description of plantA.>",
             "growingConditions": "<Growing conditions of plantA.>",
             "plantingTips": "<Planting tips of plantA.>",
@@ -199,7 +203,7 @@ def generate_final_output(state: GardenState) -> GardenState:
           },
          {
            "id": "1",
-           "name": "<plantB>",
+           "name": "<botanical (scientific) name of the plantB>",
            "description": "<A description of plantB.>",
            "growingConditions": "<Growing conditions of plantB.>",
            "plantingTips": "<Planting tips of plantB.>",
@@ -208,7 +212,7 @@ def generate_final_output(state: GardenState) -> GardenState:
         },
        {
           "id": "2",
-          "name": "<plantC>",
+          "name": "<botanical (scientific) name of the plantC>",
           "description": "<A description of plantC.>",
           "growingConditions": "<Growing conditions of plantC.>",
           "plantingTips": "<Planting tips of plantC.>",
@@ -219,7 +223,7 @@ def generate_final_output(state: GardenState) -> GardenState:
        ]
     }
     
-    The JSON should start with key "plant_recommendations". 
+    The JSON should start with key "plant_recommendations", the "name" should only be the botanical (scientific) name of the plant. Only return a JSON object, and don't add any other keys, and don't add any other text other than the JSON object.
     """
     
     messages = [
