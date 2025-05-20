@@ -1,6 +1,8 @@
 {
 	"dependencies": {
-		"uuid": "^11.1.0",
-		"react-hot-toast": "^2.5.2"
+		"@types/formidable": "^3.4.5",
+		"formidable": "^3.5.4",
+		"react-hot-toast": "^2.5.2",
+		"uuid": "^11.1.0"
 	}
 }

@@ -8,12 +8,29 @@ interface UseLocationReturn {
   isLoading: boolean;
   error: string | null;
   locationData: LocationData;
+  checkLocationPermission: () => Promise<boolean>;
 }
 
 export function useLocation(): UseLocationReturn {
   const [locationData, setLocationData] = useState<LocationData>({});
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  // 检查位置权限
+  const checkLocationPermission = async (): Promise<boolean> => {
+    if (!navigator.permissions || !navigator.permissions.query) {
+      // 如果浏览器不支持权限API，我们假设权限已授予
+      return true;
+    }
+
+    try {
+      const result = await navigator.permissions.query({ name: 'geolocation' });
+      return result.state === 'granted';
+    } catch (err) {
+      console.warn('Permission check failed:', err);
+      return false;
+    }
+  };
 
   // 获取当前位置
   const getCurrentLocation = async (): Promise<LocationData> => {
@@ -26,42 +43,98 @@ export function useLocation(): UseLocationReturn {
         throw new Error('Geolocation is not supported by your browser');
       }
 
+      // 检查是否是iOS设备
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+      console.log('Device is iOS:', isIOS);
+
       return new Promise((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(
-          async (position) => {
-            const { latitude, longitude } = position.coords;
-            
-            try {
-              // 使用反向地理编码获取地址（实际应用中可能使用Google Maps API或其他服务）
-              // 这里我们使用一个模拟的地址
-              const address = await getAddressFromCoordinates(latitude, longitude);
-              
-              const newLocationData = {
-                latitude,
-                longitude,
-                address
-              };
-              
-              setLocationData(newLocationData);
-              setIsLoading(false);
-              resolve(newLocationData);
-            } catch (err) {
-              setError('Failed to get address: ' + (err as Error).message);
-              setIsLoading(false);
-              reject(err);
-            }
-          },
-          (err) => {
-            setError('Failed to get location: ' + err.message);
-            setIsLoading(false);
-            reject(err);
+        const options = {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 0
+        };
+
+        console.log('Requesting location with options:', options);
+
+        // Check permission first
+        checkLocationPermission().then(hasPermission => {
+          if (!hasPermission) {
+            throw new Error("Location permission not granted");
           }
-        );
+
+          // 首先尝试获取位置，这会触发权限请求
+          navigator.geolocation.getCurrentPosition(
+            async (position) => {
+              console.log('Location obtained:', position);
+              const { latitude, longitude } = position.coords;
+              
+              try {
+                // 使用反向地理编码获取地址（实际应用中可能使用Google Maps API或其他服务）
+                // 这里我们使用一个模拟的地址
+                const address = await getAddressFromCoordinates(latitude, longitude);
+                
+                const newLocationData = {
+                  latitude,
+                  longitude,
+                  address
+                };
+                
+                console.log('Location data processed:', newLocationData);
+                setLocationData(newLocationData);
+                setIsLoading(false);
+                resolve(newLocationData);
+              } catch (err) {
+                console.error('Error processing location:', err);
+                setError('Failed to get address: ' + (err as Error).message);
+                setIsLoading(false);
+                reject(err);
+              }
+            },
+            (err) => {
+              console.error('Geolocation error:', err);
+              let errorMessage = '';
+              
+              // 处理特定的错误情况
+              switch (err.code) {
+                case err.PERMISSION_DENIED:
+                  if (isIOS) {
+                    errorMessage = 'Location access denied. Please follow these steps:\n\n' +
+                      '1. Open your device Settings\n' +
+                      '2. Scroll down and tap Safari\n' +
+                      '3. Tap Location\n' +
+                      '4. Select "Allow While Using App"\n\n' +
+                      'If you have already allowed location access, please try:\n' +
+                      '1. Close Safari completely\n' +
+                      '2. Reopen Safari\n' +
+                      '3. Try again';
+                  } else {
+                    errorMessage = 'Location access denied. Please enable location access in your browser settings and try again.';
+                  }
+                  break;
+                case err.POSITION_UNAVAILABLE:
+                  errorMessage = 'Location information is unavailable. Please ensure your device\'s location services are enabled and try again.';
+                  break;
+                case err.TIMEOUT:
+                  errorMessage = 'Location request timed out. Please check your internet connection and try again.';
+                  break;
+                default:
+                  errorMessage = 'Failed to get location: ' + err.message;
+              }
+              
+              setError(errorMessage);
+              setIsLoading(false);
+              reject(new Error(errorMessage));
+            },
+            options
+          );
+        });
       });
     } catch (err) {
-      setError('Location error: ' + (err as Error).message);
+      console.error('Location service error:', err);
+      const errorMessage = (err as Error).message;
+      setError(errorMessage);
       setIsLoading(false);
-      throw err;
+      throw new Error(errorMessage);
     }
   };
 
@@ -128,6 +201,7 @@ export function useLocation(): UseLocationReturn {
     setSunExposure,
     isLoading,
     error,
-    locationData
+    locationData,
+    checkLocationPermission
   };
 } 
