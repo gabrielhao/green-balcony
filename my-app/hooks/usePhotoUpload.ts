@@ -65,23 +65,93 @@ export function usePhotoUpload(): UsePhotoUploadReturn {
     setError(null);
 
     try {
-      // 检查浏览器是否支持媒体设备API
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        throw new Error('Camera access is not supported by your browser');
-      }
+      // Create a hidden input element
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.capture = 'environment'; // Use rear camera
+      input.style.display = 'none';
+      document.body.appendChild(input);
 
-      // 模拟拍照过程
-      // 在实际应用中，这里会打开相机并拍照
-      const photo = await mockTakePhoto();
-      
-      if (photo) {
-        setPhotos(prevPhotos => [...prevPhotos, photo]);
-      }
-      
+      // Create a promise to handle the photo capture
+      const photo = await new Promise<PhotoData>((resolve, reject) => {
+        // Handle file selection
+        input.onchange = async (event) => {
+          try {
+            const file = (event.target as HTMLInputElement).files?.[0];
+            if (!file) {
+              reject(new Error('No file selected'));
+              return;
+            }
+
+            console.log('File selected:', {
+              name: file.name,
+              type: file.type,
+              size: file.size
+            });
+
+            // Create a new File object with proper type and name
+            const newFile = new File([file], `photo-${Date.now()}.jpg`, {
+              type: 'image/jpeg',
+              lastModified: Date.now()
+            });
+
+            console.log('New file created:', {
+              name: newFile.name,
+              type: newFile.type,
+              size: newFile.size
+            });
+
+            // Create a preview URL for the image
+            const preview = await new Promise<string>((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => {
+                resolve(reader.result as string);
+              };
+              reader.readAsDataURL(newFile);
+            });
+
+            console.log('Preview created, length:', preview.length);
+
+            // Use existing uploadPhoto function to upload
+            const photo = await uploadPhoto(newFile);
+            console.log('Photo uploaded successfully:', photo);
+            resolve(photo);
+          } catch (error) {
+            console.error('Error in photo capture process:', error);
+            reject(error);
+          } finally {
+            // Clean up the input element
+            if (document.body.contains(input)) {
+              document.body.removeChild(input);
+            }
+          }
+        };
+
+        // Handle cancellation
+        const handleCancel = () => {
+          console.log('Camera closed by user');
+          reject(new Error('Camera closed by user'));
+          if (document.body.contains(input)) {
+            document.body.removeChild(input);
+          }
+        };
+
+        // Add event listeners for cancellation
+        input.oncancel = handleCancel;
+        window.addEventListener('focus', handleCancel, { once: true });
+
+        // Trigger the file input click
+        input.click();
+      });
+
       setIsLoading(false);
       return photo;
+
     } catch (err) {
-      setError('Camera error: ' + (err as Error).message);
+      console.error('Error in takePhoto:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      setError('Camera error: ' + errorMessage);
       setIsLoading(false);
       return null;
     }
@@ -146,11 +216,11 @@ export function usePhotoUpload(): UsePhotoUploadReturn {
   };
 
   /**
- * Uploads a file to Azure Blob Storage container "images"
- * @param file - The File object to be uploaded
- * @returns The URL of the uploaded blob
- * @throws Error if upload fails
- */
+   * Uploads a file to Azure Blob Storage container "images"
+   * @param file - The File object to be uploaded
+   * @returns The URL of the uploaded blob
+   * @throws Error if upload fails
+   */
   const uploadToAzureBlob = async (file: File): Promise<string> => {
     try {
       // Get SAS token from environment variables
@@ -165,45 +235,90 @@ export function usePhotoUpload(): UsePhotoUploadReturn {
         throw new Error('Azure Storage Account URL is not configured');
       }
 
-      // Create a BlobServiceClient
-      const blobServiceClient = new BlobServiceClient(`${storageAccountUrl}?${sasToken}`);
+      // Validate the storage account URL format
+      if (!storageAccountUrl.startsWith('https://')) {
+        throw new Error('Invalid storage account URL format');
+      }
+
+      // Remove any trailing slashes from the URL
+      const cleanStorageUrl = storageAccountUrl.replace(/\/$/, '');
+      const fullUrl = `${cleanStorageUrl}?${sasToken}`;
+
+      console.log('Attempting to connect to Azure Blob Storage:', {
+        url: cleanStorageUrl,
+        fileType: file.type,
+        fileSize: file.size
+      });
+
+      // Create a BlobServiceClient with retry options
+      const blobServiceClient = new BlobServiceClient(fullUrl);
 
       // Get a reference to the container
       const containerClient = blobServiceClient.getContainerClient("images");
 
+      // Verify container exists
+      const containerExists = await containerClient.exists();
+      if (!containerExists) {
+        throw new Error('Container "images" does not exist in the storage account');
+      }
+
       // Create a unique name for the blob
-      const blobName = `${Date.now()}-${file.name}`;
+      const timestamp = Date.now();
+      const safeFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const blobName = `${timestamp}-${safeFileName}`;
+
+      console.log('Starting upload for blob:', blobName);
 
       // Get a block blob client
       const blockBlobClient = containerClient.getBlockBlobClient(blobName);
 
-      // Upload the file to the container
+      // Upload the file to the container with options
       const uploadBlobResponse = await blockBlobClient.uploadData(file, {
-        blobHTTPHeaders: { blobContentType: file.type }
+        blobHTTPHeaders: { 
+          blobContentType: file.type,
+          blobCacheControl: 'max-age=31536000'
+        },
+        onProgress: (ev) => {
+          console.log(`Upload progress: ${ev.loadedBytes} bytes`);
+        }
       });
 
-      console.log(`File uploaded successfully. Request ID: ${uploadBlobResponse.requestId}`);
+      if (!uploadBlobResponse.requestId) {
+        throw new Error('Upload failed: No request ID received');
+      }
 
-      // Return the blob name
+      console.log('Upload successful:', {
+        requestId: uploadBlobResponse.requestId,
+        clientRequestId: uploadBlobResponse.clientRequestId,
+        version: uploadBlobResponse.version
+      });
+
       return blockBlobClient.name;
     } catch (error) {
-      console.error("Error uploading file:", error instanceof Error ? error.message : 'Unknown error');
-      throw new Error('Failed to upload file to Azure Blob Storage');
-    }
-  };
+      // Log the full error details
+      console.error('Error uploading file:', {
+        error,
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : 'Unknown error type'
+      });
 
-  // 模拟拍照
-  const mockTakePhoto = async (): Promise<PhotoData | null> => {
-    // 模拟拍照延迟
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // 返回模拟照片数据
-    return {
-      id: Date.now().toString(),
-      name: 'sample-balcony-1.jpg',
-      url: '/assets/sample-balcony-1.jpg',
-      preview: '/assets/sample-balcony-1.jpg'
-    };
+      // Check for specific error types
+      if (error instanceof Error) {
+        if (error.message.includes('Load failed')) {
+          throw new Error('Network error: Unable to connect to Azure Storage. Please check your internet connection and try again.');
+        }
+        if (error.message.includes('403')) {
+          throw new Error('Access denied: Invalid or expired SAS token');
+        }
+        if (error.message.includes('404')) {
+          throw new Error('Storage account or container not found');
+        }
+      }
+
+      throw new Error('Failed to upload file to Azure Blob Storage: ' + 
+        (error instanceof Error ? error.message : 'Unknown error'));
+    }
   };
 
   return {

@@ -30,7 +30,8 @@ export default function LocationPage() {
       goToStep(STEPS.PHOTOS);
       router.push('/photos');
     } catch (err) {
-      setError('Unable to get your location. Please try manual setting.');
+      // Use the error message from the location service
+      setError((err as Error).message);
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -66,13 +67,15 @@ export default function LocationPage() {
                 disabled={isLoading}
                 className="w-full bg-primary hover:bg-primary-dark text-white font-semibold py-4 rounded-full transition duration-300 ease-in-out"
               >
-                {isLoading ? 'Getting location...' : 'OK'}
+                {isLoading ? 'Getting location...' : 'Allow Location Access'}
               </button>
               
               {error && (
-                <p className="text-red-500 text-sm mt-4 text-center">
-                  {error}
-                </p>
+                <div className="mt-4 p-4 bg-red-50 rounded-lg">
+                  <p className="text-red-600 text-sm whitespace-pre-line">
+                    {error}
+                  </p>
+                </div>
               )}
               
               {/* Optional manual location setting link */}
